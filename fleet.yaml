@@ -1,0 +1,8 @@
+namespace: fleet-kustomize
+targetCustomizations:
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        cluster-id: rancher-syd-prod
+    kustomize:
+      dir: clusters/rancher-syd-prod

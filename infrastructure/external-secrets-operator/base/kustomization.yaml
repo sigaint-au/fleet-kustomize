@@ -1,0 +1,8 @@
+helmCharts:
+  - name: external-secrets
+    includeCRDs: true
+    valuesInline:
+      installCRDs: true
+    releaseName: external-secrets
+    version: 2.3.0
+    repo: https://charts.external-secrets.io
