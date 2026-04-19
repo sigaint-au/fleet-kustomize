@@ -1,4 +1,12 @@
 namespace: fleet-kustomize
+helm:
+  repo: https://charts.external-secrets.io
+  chart: external-secrets
+  version: 2.3.0
+  releaseName: external-secrets
+  values:
+    installCRDs: true
+
 targetCustomizations:
   - name: rancher-syd-prod
     clusterSelector:
