@@ -1,9 +1,9 @@
-namespace: fleet-kustomize
 helm:
   repo: https://charts.external-secrets.io
   chart: external-secrets
   version: 2.3.0
   releaseName: external-secrets
+  namespace: external-secrets
   values:
     installCRDs: true
 
