@@ -1,0 +1,11 @@
+# fleet.yaml
+defaultNamespace: traefik
+labels:
+  component: traefik-install
+helm:
+  repo: https://traefik.github.io/charts
+  chart:
+  version: 39.0.6
+  releaseName: trefik
+  valuesFiles:
+    - values/production.yaml

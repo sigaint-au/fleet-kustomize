@@ -1,0 +1,44 @@
+# traefik-values.yaml
+
+deployment:
+  enabled: true
+  kind: DaemonSet
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+
+# Target the specific node
+nodeSelector:
+  kubernetes.io/hostname: rancher-a163.syd.prod.sigaint.au
+
+# Tolerate the custom taint
+tolerations:
+  - key: "ingress"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+ports:
+  web:
+    port: 8000 # Internal container port
+    hostPort: 80 # The actual port on the host machine
+    expose:
+      default: true # New object-style syntax
+  websecure:
+    port: 8443 # Internal container port
+    hostPort: 443 # The actual port on the host machine
+    expose:
+      default: true # New object-style syntax
+
+# Since we are using hostNetwork, we don't need the K8s Service
+# to manage a LoadBalancer/NodePort for us.
+service:
+  enabled: false
+
+providers:
+  kubernetesGateway:
+    enabled: true
+    experimentalChannel: true
+
+  # Optional: Disable the standard Ingress provider if you are strictly using Gateway API
+  # kubernetesIngress:
+  #   enabled: false
