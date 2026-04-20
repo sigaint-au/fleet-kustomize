@@ -6,3 +6,8 @@ targetCustomizations:
         cluster-id: rancher-syd-prod
     kustomize:
       dir: overlays/production
+
+dependsOn:
+  - selector:
+      matchLabels:
+        component: external-secrets-operato-install
