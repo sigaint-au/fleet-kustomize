@@ -4,8 +4,8 @@ labels:
   component: traefik-install
 helm:
   repo: https://traefik.github.io/charts
-  chart:
+  chart: traefik
   version: 39.0.6
-  releaseName: trefik
+  releaseName: traefik
   valuesFiles:
     - values/production.yaml
