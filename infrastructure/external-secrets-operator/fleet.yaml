@@ -1,9 +1,10 @@
+# fleet.yaml
+defaultNamespace: external-secrets
 helm:
   repo: https://charts.external-secrets.io
   chart: external-secrets
-  version: 2.3.0
+  version: 0.9.13
   releaseName: external-secrets
-  namespace: external-secrets
   values:
     installCRDs: true
 
@@ -13,4 +14,4 @@ targetCustomizations:
       matchLabels:
         cluster-id: rancher-syd-prod
     kustomize:
-      dir: clusters/rancher-syd-prod
+      dir: overlays/production

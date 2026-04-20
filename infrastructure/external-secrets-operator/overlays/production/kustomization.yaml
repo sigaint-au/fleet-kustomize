@@ -1,3 +1,2 @@
 resources:
-# - doppler-secret.yaml
-  - doppler-secretstore.yaml
+  - ../../base

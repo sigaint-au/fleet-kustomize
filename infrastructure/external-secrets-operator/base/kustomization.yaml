@@ -1,0 +1,3 @@
+resources:
+#  - doppler-secret.yaml
+  - dopper-secretstore.yaml
