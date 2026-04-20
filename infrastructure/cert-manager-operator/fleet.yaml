@@ -1,0 +1,11 @@
+# fleet.yaml
+defaultNamespace: cert-manager
+labels:
+  component: cert-manager-operator-install
+helm:
+  repo: https://charts.jetstack.io
+  chart: cert-manager
+  version: v1.20.0
+  releaseName: cert-manager
+  valuesFiles:
+    - values/production.yaml

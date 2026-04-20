@@ -1,0 +1,40 @@
+# cert-manager-values.yaml
+
+# Latest charts use crds.enabled instead of installCRDs
+crds:
+  enabled: true
+
+# The main controller also needs tolerations to run on rancher-a163
+tolerations:
+  - key: "ingress"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+webhook:
+  hostNetwork: true
+  # Changing the port is smart to avoid conflicts with 
+  # other host-networked services or system processes.
+  securePort: 10260
+  timeoutSeconds: 30
+  tolerations:
+    - key: "ingress"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+
+cainjector:
+  tolerations:
+    - key: "ingress"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+
+startupapicheck:
+  tolerations:
+    - key: "ingress"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+config:
+  enableGatewayAPI: true
