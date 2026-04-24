@@ -1,0 +1,11 @@
+# fleet.yaml
+defaultNamespace: velero
+labels:
+  component: velero-install
+helm:
+  repo: oci://dp.apps.rancher.io/charts/velero
+  chart: velero
+  version: 12.0.0
+  releaseName: velero
+  valuesFiles:
+    - values/production.yaml
