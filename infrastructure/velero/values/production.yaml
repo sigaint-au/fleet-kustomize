@@ -11,8 +11,6 @@ credentials:
 
 # === Core Configuration ===
 configuration:
-  provider: aws
-
   backupStorageLocation:
     - name: default
       provider: aws
@@ -43,53 +41,3 @@ initContainers:
 # === Node Agent (for PV / FS backups) ===
 nodeAgent:
   enabled: true
-  # You can add resources, tolerations, etc. here if needed
-
-# =============================================
-# Keep most Rancher defaults below (only overrides shown above)
-# =============================================
-
-backupsEnabled: true
-snapshotsEnabled: true
-upgradeCRDs: true
-cleanUpCRDs: false
-
-image:
-  registry: dp.apps.rancher.io
-  repository: containers/velero
-  tag: 1.18.0-7.1
-
-kubectl:
-  image:
-    registry: dp.apps.rancher.io
-    repository: containers/kubectl
-    tag: 1.34.6-5.6
-
-# Metrics (recommended)
-metrics:
-  enabled: true
-  serviceMonitor:
-    enabled: false   # Set true if you have Prometheus Operator
-  podMonitor:
-    enabled: false
-
-# Security / RBAC
-rbac:
-  create: true
-  clusterAdministrator: true
-
-# Resources (adjust as needed)
-resources:
-  requests:
-    cpu: 500m
-    memory: 512Mi
-  limits:
-    cpu: 1000m
-    memory: 1024Mi
-
-# Leave the rest as Rancher defaults unless you need changes
-affinity: {}
-nodeSelector: {}
-tolerations: []
-podSecurityContext: {}
-containerSecurityContext: {}
