@@ -4,7 +4,6 @@ labels:
   component: velero-install
 helm:
   repo: oci://dp.apps.rancher.io/charts/velero
-  version: 12.0.0
   releaseName: velero
   valuesFiles:
     - values/production.yaml
