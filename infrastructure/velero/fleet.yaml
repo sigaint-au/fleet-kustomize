@@ -2,9 +2,10 @@
 defaultNamespace: velero
 labels:
   component: velero-install
+
 helm:
-  repo: https://vmware-tanzu.github.io/helm-charts
-  name: velero
+  repo: oci://dp.apps.rancher.io/charts/velero
+  version: 12.0.0
   releaseName: velero
   valuesFiles:
     - values/production.yaml

@@ -1,17 +1,24 @@
+# =============================================
+# Merged Velero values for Rancher Application Collection
+# =============================================
+
 namespace: velero
 
+# === Credentials ===
 credentials:
   useSecret: true
   existingSecret: b2-velero-credentials
 
+# === Core Configuration ===
 configuration:
   provider: aws
+
   backupStorageLocation:
     - name: default
       provider: aws
       bucket: my-k8s-backups
       config:
-        region: us-west-001
+        region: us-west-001 =
         s3Url: https://s3.us-west-000.backblazeb2.com
         s3ForcePathStyle: "true"
 
@@ -21,6 +28,10 @@ configuration:
       config:
         region: us-west-000
 
+  # Optional: Make default explicit
+  defaultBackupStorageLocation: default
+
+# === Plugins (AWS for Backblaze) ===
 initContainers:
   - name: velero-plugin-for-aws
     image: velero/velero-plugin-for-aws:latest
@@ -29,5 +40,56 @@ initContainers:
       - mountPath: /target
         name: plugins
 
+# === Node Agent (for PV / FS backups) ===
 nodeAgent:
   enabled: true
+  # You can add resources, tolerations, etc. here if needed
+
+# =============================================
+# Keep most Rancher defaults below (only overrides shown above)
+# =============================================
+
+backupsEnabled: true
+snapshotsEnabled: true
+upgradeCRDs: true
+cleanUpCRDs: false
+
+image:
+  registry: dp.apps.rancher.io
+  repository: containers/velero
+  tag: 1.18.0-7.1
+
+kubectl:
+  image:
+    registry: dp.apps.rancher.io
+    repository: containers/kubectl
+    tag: 1.34.6-5.6
+
+# Metrics (recommended)
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false   # Set true if you have Prometheus Operator
+  podMonitor:
+    enabled: false
+
+# Security / RBAC
+rbac:
+  create: true
+  clusterAdministrator: true
+
+# Resources (adjust as needed)
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+
+# Leave the rest as Rancher defaults unless you need changes
+affinity: {}
+nodeSelector: {}
+tolerations: []
+podSecurityContext: {}
+containerSecurityContext: {}
