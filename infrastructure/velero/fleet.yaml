@@ -3,8 +3,7 @@ defaultNamespace: velero
 labels:
   component: velero-install
 helm:
-  repo: oci://dp.apps.rancher.io/charts
-  chart: velero
+  repo: oci://dp.apps.rancher.io/charts/velero
   version: 12.0.0
   releaseName: velero
   valuesFiles:
