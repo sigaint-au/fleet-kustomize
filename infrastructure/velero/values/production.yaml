@@ -1,8 +1,3 @@
-# =============================================
-# Merged Velero values for Rancher Application Collection
-# =============================================
-
-namespace: velero
 
 # === Credentials ===
 credentials:
@@ -38,6 +33,154 @@ initContainers:
       - mountPath: /target
         name: plugins
 
-# === Node Agent (for PV / FS backups) ===
-nodeAgent:
+# === Default Crap ===
+affinity: {}
+annotations: {}
+backupsEnabled: true
+cleanUpCRDs: false
+configMaps: {}
+containerSecurityContext: {}
+deployNodeAgent: true
+dnsConfig: {}
+dnsPolicy: ClusterFirst
+extraObjects: []
+extraVolumeMounts: []
+extraVolumes: []
+fullnameOverride: ''
+global:
+  imagePullSecrets: []
+  imageRegistry: ''
+hostAliases: []
+image:
+  imagePullSecrets: []
+  pullPolicy: IfNotPresent
+  registry: dp.apps.rancher.io
+  repository: containers/velero
+  tag: 1.18.0-7.1
+kubectl:
+  annotations: {}
+  containerSecurityContext: {}
+  extraVolumeMounts: []
+  extraVolumes: []
+  image:
+    registry: dp.apps.rancher.io
+    repository: containers/kubectl
+    tag: 1.34.6-5.6
+  labels: {}
+  resources: {}
+labels: {}
+lifecycle: {}
+livenessProbe:
+  failureThreshold: 5
+  httpGet:
+    path: /metrics
+    port: http-monitoring
+    scheme: HTTP
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  successThreshold: 1
+  timeoutSeconds: 5
+metrics:
   enabled: true
+  nodeAgentPodMonitor:
+    additionalLabels: {}
+    annotations: {}
+    autodetect: true
+    enabled: false
+  podAnnotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: '8085'
+    prometheus.io/scrape: 'true'
+  prometheusRule:
+    additionalLabels: {}
+    autodetect: true
+    enabled: false
+    spec: []
+  scrapeInterval: 30s
+  scrapeTimeout: 10s
+  service:
+    annotations: {}
+    externalTrafficPolicy: ''
+    internalTrafficPolicy: ''
+    ipFamilies: []
+    ipFamilyPolicy: ''
+    labels: {}
+    nodePort: null
+    type: ClusterIP
+  serviceMonitor:
+    additionalLabels: {}
+    annotations: {}
+    autodetect: true
+    enabled: false
+nameOverride: ''
+namespace:
+  labels: {}
+nodeAgent:
+  affinity: {}
+  annotations: {}
+  containerSecurityContext: {}
+  disableHostPath: false
+  dnsConfig: {}
+  dnsPolicy: ClusterFirst
+  extraArgs: []
+  extraEnvVars: []
+  extraVolumeMounts: []
+  extraVolumes: []
+  hostAliases: []
+  labels: {}
+  lifecycle: {}
+  nodeSelector: {}
+  pluginVolumePath: /var/lib/kubelet/plugins
+  podLabels: {}
+  podSecurityContext:
+    runAsUser: 0
+  podVolumePath: /var/lib/kubelet/pods
+  priorityClassName: ''
+  resizePolicy: []
+  resources: {}
+  runtimeClassName: ''
+  tolerations: []
+  updateStrategy: {}
+  useScratchEmptyDir: true
+nodeSelector: {}
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+priorityClassName: ''
+rbac:
+  clusterAdministrator: true
+  clusterAdministratorName: cluster-admin
+  create: true
+readinessProbe:
+  failureThreshold: 5
+  httpGet:
+    path: /metrics
+    port: http-monitoring
+    scheme: HTTP
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  successThreshold: 1
+  timeoutSeconds: 5
+resizePolicy: []
+resources: {}
+runtimeClassName: ''
+schedules: {}
+secretAnnotations: {}
+serviceAccount:
+  server:
+    annotations: null
+    automountServiceAccountToken: true
+    create: true
+    imagePullSecrets: []
+    labels: null
+    name: null
+snapshotsEnabled: true
+terminationGracePeriodSeconds: 3600
+tolerations: []
+upgradeCRDs: true
+upgradeCRDsJob:
+  automountServiceAccountToken: true
+  extraEnvVars: []
+  extraVolumeMounts: []
+  extraVolumes: []
+upgradeJobResources: {}
