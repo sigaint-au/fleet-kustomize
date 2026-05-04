@@ -48,7 +48,8 @@ extraVolumeMounts: []
 extraVolumes: []
 fullnameOverride: ''
 global:
-  imagePullSecrets: []
+  imagePullSecrets:
+    - name: "application-collection"
   imageRegistry: ''
 hostAliases: []
 image:
