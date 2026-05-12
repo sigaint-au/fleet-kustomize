@@ -8,5 +8,17 @@ helm:
   releaseName: metallb
   valuesFiles:
     - values/production.yaml
-
   takeOwnership: true
+
+diff:
+  comparePatches:
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: MutatingWebhookConfiguration
+      name: metallb-webhook-configuration
+      operations:
+        - {"op": "remove", "path": "/webhooks/0/clientConfig/caBundle"}
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: ValidatingWebhookConfiguration
+      name: metallb-webhook-configuration
+      operations:
+        - {"op": "remove", "path": "/webhooks/0/clientConfig/caBundle"}
