@@ -8,3 +8,15 @@ helm:
   version: 0.27.1
   releaseName: cnpg
 
+diff:
+  comparePatches:
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: MutatingWebhookConfiguration
+      name: cnpg-mutating-webhook-configuration
+      operations:
+        - {"op": "remove", "path": "/webhooks/0/clientConfig/caBundle"}
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: ValidatingWebhookConfiguration
+      name: cnpg-mutating-webhook-configuration
+      operations:
+        - {"op": "remove", "path": "/webhooks/0/clientConfig/caBundle"}
