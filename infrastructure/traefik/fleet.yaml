@@ -10,8 +10,7 @@ helm:
   valuesFiles:
     - values/production.yaml
 
-targetCustomizations:
-  - name: rancher-syd-prod
-    clusterSelector:
+overrideTargets:
+  - clusterSelector:
       matchLabels:
         cluster-id: rancher-syd-prod

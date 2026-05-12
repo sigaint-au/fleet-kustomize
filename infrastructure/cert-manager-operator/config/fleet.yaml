@@ -7,6 +7,13 @@ targetCustomizations:
     kustomize:
       dir: overlays/production
 
+  - name: development
+    clusterSelector:
+      matchLabels:
+        sigaint.au/environment: development
+    kustomize:
+      dir: overlays/development
+
 dependsOn:
   - selector:
       matchLabels:
