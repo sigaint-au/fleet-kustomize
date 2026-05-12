@@ -1,9 +1,9 @@
 # fleet.yaml
 targetCustomizations:
-  - name: rancher-syd-prod
+  - name: production
     clusterSelector:
       matchLabels:
-        cluster-id: rancher-syd-prod
+        sigaint.au/environment: production
     kustomize:
       dir: overlays/production
 

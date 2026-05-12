@@ -9,3 +9,9 @@ helm:
   releaseName: traefik
   valuesFiles:
     - values/production.yaml
+
+targetCustomizations:
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        cluster-id: rancher-syd-prod
