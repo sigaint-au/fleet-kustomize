@@ -14,9 +14,19 @@ diff:
       kind: MutatingWebhookConfiguration
       name: cnpg-mutating-webhook-configuration
       operations:
-        - {"op": "remove", "path": "/webhooks/0/clientConfig/caBundle"}
+        - op: remove
+          path: /webhooks/0/clientConfig/caBundle
+        - op: remove
+          path: /webhooks
     - apiVersion: admissionregistration.k8s.io/v1
       kind: ValidatingWebhookConfiguration
       name: cnpg-mutating-webhook-configuration
       operations:
-        - {"op": "remove", "path": "/webhooks/0/clientConfig/caBundle"}
+        - op: remove
+          path: /webhooks/0/clientConfig/caBundle
+    - apiVersion: admissionregistration.k8s.io/v1
+      kind: ValidatingWebhookConfiguration
+      name: cnpg-validating-webhook-configuration
+      operations:
+        - op: remove
+          path: /webhooks
