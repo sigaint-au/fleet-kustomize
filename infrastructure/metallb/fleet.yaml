@@ -1,0 +1,12 @@
+# fleet.yaml
+defaultNamespace: metallb-system
+labels:
+  component: metallb-operator-install
+helm:
+  repo: https://metallb.github.io/metallb
+  chart: metallb
+  releaseName: metallb
+  valuesFiles:
+    - values/production.yaml
+
+  takeOwnership: true

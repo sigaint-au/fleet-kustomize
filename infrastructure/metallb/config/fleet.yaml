@@ -1,0 +1,18 @@
+# fleet.yaml
+targetCustomizations:
+  - name: k3s-lhm-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-prod
+    kustomize:
+      dir: overlays/clusters/k3s-lhm-prod
+  - name: k3s-lhm-devel
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-devel
+    kustomize:
+      dir: overlays/clusters/k3s-lhm-devel
+dependsOn:
+  - selector:
+      matchLabels:
+        component: metallb-operator-install

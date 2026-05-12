@@ -1,0 +1,5 @@
+resources:
+  - ../../../base
+  - ipaddresspool.yaml
+  - bgppeer.yaml
+  - bgpadvertisement.yaml

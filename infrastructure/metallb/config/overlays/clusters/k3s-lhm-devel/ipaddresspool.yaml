@@ -1,0 +1,37 @@
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: net-sigaint-dmz
+  namespace: metallb-system
+spec:
+  addresses:
+    - '10.120.20.200-250.120.20.255'
+    - '2404:e80:4b6f:1:1337::100-2404:e80:4b6f:1:1337::200'
+  autoAssign: true
+  avoidBuggyIPs: false
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: net-sigaint-vmnet
+  namespace: metallb-system
+spec:
+  addresses:
+    - '10.120.21.250-10.120.21.255'
+    - '2404:e80:4b6f:6:1337::100-2404:e80:4b6f:6:1337::200'
+
+  autoAssign: true
+  avoidBuggyIPs: false
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: net-sigaint-corp
+  namespace: metallb-system
+spec:
+  addresses:
+    - '10.120.13.250-10.120.13.255'
+    - '2404:e80:4b6f:0:1337::100-2404:e80:4b6f:0:1337::200'
+  autoAssign: true
+  avoidBuggyIPs: false

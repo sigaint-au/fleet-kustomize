@@ -1,0 +1,11 @@
+apiVersion: metallb.io/v1beta2
+kind: BGPPeer
+metadata:
+  name: vyos-peer
+  namespace: metallb-system
+spec:
+  disableMP: false
+  myASN: 65000
+  peerASN: 65000
+  peerAddress: 10.120.14.1
+  peerPort: 179
