@@ -1,0 +1,11 @@
+# fleet.yaml
+defaultNamespace: monitoring
+labels:
+  component: persus-install
+
+helm:
+  repo: oci://dp.apps.rancher.io/charts/velero
+  version: 12.0.1
+  releaseName: velero
+  valuesFiles:
+    - values/production.yaml

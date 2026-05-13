@@ -1,0 +1,28 @@
+credentials:
+  useSecret: true
+  existingSecret: b2-velero-credentials
+
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: my-k8s-backups
+      config:
+        region: us-west-001 =
+        s3Url: https://s3.us-west-000.backblazeb2.com
+        s3ForcePathStyle: "true"
+
+  volumeSnapshotLocation:
+    - name: default
+      provider: aws
+      config:
+        region: us-west-000
+  defaultBackupStorageLocation: default
+
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:latest
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
