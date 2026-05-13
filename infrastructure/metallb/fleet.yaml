@@ -9,7 +9,6 @@ helm:
   valuesFiles:
     - values/production.yaml
   takeOwnership: true
-
 diff:
   comparePatches:
     - apiVersion: admissionregistration.k8s.io/v1
