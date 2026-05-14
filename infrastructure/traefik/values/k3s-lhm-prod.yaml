@@ -2,6 +2,7 @@
 service:
   enabled: true
   type: LoadBalancer
+  ipFamilyPolicy: PreferDualStack
 
 providers:
   kubernetesGateway:
