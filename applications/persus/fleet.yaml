@@ -1,4 +1,5 @@
 # fleet.yaml
+---
 defaultNamespace: monitoring
 labels:
   component: persus-install

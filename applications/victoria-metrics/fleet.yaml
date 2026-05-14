@@ -1,11 +1,11 @@
 # fleet.yaml
+---
 defaultNamespace: monitoring
 labels:
   component: vmcluster-install
-
 helm:
   repo: https://victoriametrics.github.io/helm-charts/
-  version: '*''
+  version: '*'
   chart: victoria-metrics-cluster
   releaseName: vmcluster
   valuesFiles:
