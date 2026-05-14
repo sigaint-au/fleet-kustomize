@@ -10,7 +10,7 @@ spec:
     - '2404:e80:4b6f:1:1337::100-2404:e80:4b6f:1:1337::200'
   autoAssign: true
   avoidBuggyIPs: false
-  allocateTo:
+  serviceAllocation:
     priority: 100
 ---
 apiVersion: metallb.io/v1beta1
