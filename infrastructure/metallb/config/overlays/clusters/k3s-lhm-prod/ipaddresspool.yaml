@@ -14,19 +14,6 @@ spec:
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: net-sigaint-vmnet
-  namespace: metallb-system
-spec:
-  addresses:
-    - '10.120.21.200-10.120.21.250'
-    - '2404:e80:4b6f:6:1337::1-2404:e80:4b6f:6:1337::100'
-
-  autoAssign: true
-  avoidBuggyIPs: false
----
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
   name: net-sigaint-corp
   namespace: metallb-system
 spec:
