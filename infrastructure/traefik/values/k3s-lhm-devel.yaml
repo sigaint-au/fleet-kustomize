@@ -4,6 +4,8 @@ service:
   enabled: true
   type: LoadBalancer
   ipFamilyPolicy: PreferDualStack
+  ipFamilies: ["IPv4", "IPv6"]
+
 
 providers:
   kubernetesGateway:
