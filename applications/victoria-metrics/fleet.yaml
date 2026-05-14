@@ -8,5 +8,21 @@ helm:
   version: '*'
   chart: victoria-metrics-cluster
   releaseName: vmcluster
-  valuesFiles:
-    - values/production.yaml
+
+
+targetCustomizations:
+  - name: production
+    clusterSelector:
+      matchLabels:
+        sigaint.au/environment: production
+    helm:
+      valuesFiles:
+        - values/production.yaml
+
+  - name: development
+    clusterSelector:
+      matchLabels:
+        sigaint.au/environment: development
+    helm:
+      valuesFiles:
+        - values/development.yaml
