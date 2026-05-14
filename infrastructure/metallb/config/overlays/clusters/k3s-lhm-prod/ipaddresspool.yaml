@@ -22,5 +22,5 @@ spec:
   addresses:
     - '10.120.13.200-10.120.13.250'
     - '2404:e80:4b6f:0:1337::1-2404:e80:4b6f:0:1337::100'
-  autoAssign: true
+  autoAssign: false
   avoidBuggyIPs: false
