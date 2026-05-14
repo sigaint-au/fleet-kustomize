@@ -10,6 +10,8 @@ spec:
     - '2404:e80:4b6f:1:1337::1-2404:e80:4b6f:1:1337::100'
   autoAssign: true
   avoidBuggyIPs: false
+  allocateTo:
+    priority: 100
 ---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
