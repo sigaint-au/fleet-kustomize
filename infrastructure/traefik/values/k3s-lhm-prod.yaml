@@ -1,0 +1,9 @@
+# traefik-values.yaml
+service:
+  enabled: true
+  type: LoadBalancer
+
+providers:
+  kubernetesGateway:
+    enabled: true
+    experimentalChannel: true

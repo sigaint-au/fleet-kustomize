@@ -38,7 +38,3 @@ providers:
   kubernetesGateway:
     enabled: true
     experimentalChannel: true
-
-  # Optional: Disable the standard Ingress provider if you are strictly using Gateway API
-  # kubernetesIngress:
-  #   enabled: false

@@ -7,10 +7,28 @@ helm:
   chart: traefik
   version: 39.0.6
   releaseName: traefik
-  valuesFiles:
-    - values/production.yaml
 
-overrideTargets:
-  - clusterSelector:
+targetCustomizations:
+  - name: k3s-lhm-prod
+    clusterSelector:
       matchLabels:
-        cluster-id: rancher-syd-prod
+        sigaint.au/cluster-id: k3s-lhm-prod
+    helm:
+      valuesFiles:
+        - values/k3s-lhm-prod.yaml
+
+  - name: k3s-lhm-devel
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-devel
+    helm:
+      valuesFiles:
+        - values/k3s-lhm-devel.yaml
+
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: rancher-syd-prod
+    helm:
+      valuesFiles:
+        - values/rancher-syd-prod.yaml
