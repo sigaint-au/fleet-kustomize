@@ -5,8 +5,8 @@ labels:
   component: persus-install
 
 helm:
-  repo: oci://dp.apps.rancher.io/charts/velero
-  version: 12.0.1
-  releaseName: velero
+  repo: https://perses.github.io/helm-charts
+  version: 0.53.1
+  releaseName: persus
   valuesFiles:
     - values/production.yaml
