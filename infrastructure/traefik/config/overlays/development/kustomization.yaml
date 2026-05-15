@@ -1,3 +1,0 @@
-resources:
-  - ../../base
-  - gateway-api-experimental-1_5_1.yaml

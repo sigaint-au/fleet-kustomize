@@ -9,4 +9,4 @@ service:
 providers:
   kubernetesGateway:
     enabled: true
-    experimentalChannel: true
+    experimentalChannel: false
