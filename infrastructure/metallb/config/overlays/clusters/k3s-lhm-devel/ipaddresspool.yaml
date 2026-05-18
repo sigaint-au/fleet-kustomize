@@ -6,7 +6,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-    - '10.120.20.200-250.120.20.255'
+    - '10.120.20.250-10.120.20.255'
     - '2404:e80:4b6f:1:1337::100-2404:e80:4b6f:1:1337::200'
   autoAssign: true
   avoidBuggyIPs: false
