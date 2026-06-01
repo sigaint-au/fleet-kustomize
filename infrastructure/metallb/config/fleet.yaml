@@ -12,6 +12,12 @@ targetCustomizations:
         sigaint.au/cluster-id: k3s-lhm-devel
     kustomize:
       dir: overlays/clusters/k3s-lhm-devel
+
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: rancher-syd-prod
+
 dependsOn:
   - selector:
       matchLabels:

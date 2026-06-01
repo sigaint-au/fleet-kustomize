@@ -32,6 +32,11 @@ targetCustomizations:
         - values/production.yaml
       takeOwnership: true
 
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: rancher-syd-prod
+
 diff:
   comparePatches:
     - apiVersion: admissionregistration.k8s.io/v1
