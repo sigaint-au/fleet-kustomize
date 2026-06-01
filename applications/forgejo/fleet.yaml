@@ -1,3 +1,7 @@
+# Forgejo (Git) deployment for the Sydney cluster.
+#
+# Requires the supporting bundle at applications/forgejo/config/
+# (creates Namespace + ExternalSecrets for LDAP + admin password).
 defaultNamespace: forgejo
 labels:
   component: forgejo-install

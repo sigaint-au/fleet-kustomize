@@ -3,10 +3,15 @@
 # Chart: oci://code.forgejo.org/forgejo-helm/forgejo
 #
 # Note: The Helm chart is deployed via Fleet's native helm: section (see fleet.yaml).
-# Supporting resources (ExternalSecret for LDAP password + CA cert) are deployed
-# from applications/forgejo/config/base/ as a separate bundle.
+# Supporting resources (ExternalSecrets for LDAP password, CA cert, and admin password)
+# are deployed from applications/forgejo/config/base/ as a separate bundle.
 
 gitea:
+  admin:
+    username: "admin"
+    email: "admin@sigaint.au"
+    # Password is injected via extraEnv below (from ExternalSecret)
+
   config:
     server:
       DOMAIN: git.sigaint.au
@@ -31,14 +36,20 @@ gitea:
       mountPath: /data/freeipa-ca
       readOnly: true
 
-  # Inject LDAP bind password from the ExternalSecret-managed Secret
-  # (The same secret also provides the FreeIPA CA certificate via volume mount)
+  # Inject secrets from External Secrets Operator (Doppler)
   env:
     - name: FORGEJO__LDAP__BIND_PASSWORD
       valueFrom:
         secretKeyRef:
           name: forgejo-ldap-bind
           key: bind-password
+
+    # Initial admin user password (only used on first startup if the user doesn't exist)
+    - name: GITEA_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-admin
+          key: password
 
   # LDAP (FreeIPA) configuration
   # Note: Must be an array (list) because of the chart's values schema.
