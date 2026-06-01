@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: forgejo
+  labels:
+    # Optional: add any labels you use for policy/networking
+    pod-security.kubernetes.io/enforce: baseline

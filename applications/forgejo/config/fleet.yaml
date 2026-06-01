@@ -1,0 +1,16 @@
+# fleet.yaml for supporting resources (ExternalSecret, Namespace)
+# This bundle should be targeted separately from the main Helm chart.
+#
+# The main Forgejo Helm chart depends on this bundle via component: forgejo-config.
+
+defaultNamespace: forgejo
+labels:
+  component: forgejo-config
+
+targetCustomizations:
+  - name: syd-rancher-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: syd-rancher-prod
+    kustomize:
+      dir: overlays/clusters/syd-rancher-prod

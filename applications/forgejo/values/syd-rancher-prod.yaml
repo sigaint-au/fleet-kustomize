@@ -1,0 +1,90 @@
+# Values for Forgejo on git.sigaint.au (syd-rancher-prod cluster)
+#
+# Chart: oci://code.forgejo.org/forgejo-helm/forgejo
+#
+# Note: The Helm chart is deployed via Fleet's native helm: section (see fleet.yaml).
+# Supporting resources (ExternalSecret for LDAP password + CA cert) are deployed
+# from applications/forgejo/config/base/ as a separate bundle.
+
+gitea:
+  config:
+    server:
+      DOMAIN: git.sigaint.au
+      ROOT_URL: https://git.sigaint.au/
+      PROTOCOL: http   # TLS terminated at Ingress
+
+    security:
+      # Trust the FreeIPA CA certificate (mounted from the ExternalSecret-managed Secret below)
+      CA_CERTS: /data/freeipa-ca/ca.crt
+
+  # Mount FreeIPA CA certificate from the Secret populated by External Secrets Operator
+  extraVolumes:
+    - name: freeipa-ca
+      secret:
+        secretName: forgejo-ldap-bind
+        items:
+          - key: ca.crt
+            path: ca.crt
+
+  extraVolumeMounts:
+    - name: freeipa-ca
+      mountPath: /data/freeipa-ca
+      readOnly: true
+
+  # Inject LDAP bind password from the ExternalSecret-managed Secret
+  # (The same secret also provides the FreeIPA CA certificate via volume mount)
+  env:
+    - name: FORGEJO__LDAP__BIND_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-ldap-bind
+          key: bind-password
+
+  # LDAP (FreeIPA) configuration
+  ldap:
+    enabled: true
+    name: "FreeIPA"
+    host: "idm-8b64.de.sigaint.au"
+    port: "389"
+    use_ssl: false
+    start_tls: true
+    bind_dn: "uid=svc-ldap-bind,cn=users,cn=accounts,dc=sigaint,dc=au"
+    # Password is injected via the env var above (from ExternalSecret)
+    bind_password: ""
+    user_base: "cn=users,cn=accounts,dc=sigaint,dc=au"
+    user_dn_search_base: "cn=users,cn=accounts,dc=sigaint,dc=au"
+    user_filter: "(&(uid=%[1]s)(objectClass=posixAccount))"
+    admin_filter: "(memberOf=cn=admins,cn=groups,cn=accounts,dc=sigaint,dc=au)"
+    email_attribute: "mail"
+    uid_attribute: "uid"
+    username_attribute: "uid"
+    firstname_attribute: "givenName"
+    surname_attribute: "sn"
+    avatar_attribute: ""
+    attributes_in_bind: false
+    synchronize_users: true
+    allow_deactivate_all: false
+
+ingress:
+  enabled: true
+  annotations:
+    # cert-manager will handle TLS via ClusterIssuer
+    cert-manager.io/cluster-issuer: le-production
+  hosts:
+    - host: git.sigaint.au
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: git-sigaint-au-tls
+      hosts:
+        - git.sigaint.au
+
+# Minimal persistence (adjust storageClass if needed)
+persistence:
+  enabled: true
+  size: 10Gi
+  # storageClass: longhorn   # uncomment if you have a preferred class
+
+# Use a single replica for minimal deployment
+replicaCount: 1
