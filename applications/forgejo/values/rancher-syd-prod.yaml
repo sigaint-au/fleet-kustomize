@@ -48,7 +48,7 @@ gitea:
     - name: GITEA_ADMIN_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: forgejo-admin
+          name: forgejo-admin-external
           key: password
 
   # LDAP (FreeIPA) configuration
