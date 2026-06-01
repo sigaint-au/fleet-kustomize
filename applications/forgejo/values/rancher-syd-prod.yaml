@@ -10,6 +10,7 @@ gitea:
   admin:
     username: "admin_local"
     email: "admin@sigaint.au"
+    password: "na"
     # Password is injected via extraEnv below (from ExternalSecret)
 
   config:
