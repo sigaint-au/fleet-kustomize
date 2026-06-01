@@ -1,4 +1,13 @@
 # fleet.yaml
+
+targetRestrictions:
+  - clusterSelector:
+      matchExpressions:
+        - key:  sigaint.au/cluster-id
+          operator: NotIn
+          values:
+            - rancher-syd-prod
+
 targetCustomizations:
   - name: k3s-lhm-prod
     clusterSelector:

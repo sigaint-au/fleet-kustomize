@@ -6,6 +6,15 @@ defaultNamespace: forgejo
 labels:
   component: forgejo-install
 
+targetRestrictions:
+  - clusterSelector:
+      matchExpressions:
+        - key:  sigaint.au/cluster-id
+          operator: NotIn
+          values:
+            - k3s-prod-lhm
+            - k3s-devel-lhm
+
 targetCustomizations:
 
   - name: k3s-prod-lhm

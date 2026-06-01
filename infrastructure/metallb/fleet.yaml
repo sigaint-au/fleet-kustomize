@@ -5,6 +5,15 @@ labels:
 
 # Deploy MetalLB Helm chart only on the k3s-lhm clusters.
 # Do NOT deploy on syd-rancher-prod (Sydney), which uses hostNetwork Traefik.
+
+targetRestrictions:
+  - clusterSelector:
+      matchExpressions:
+        - key:  sigaint.au/cluster-id
+          operator: NotIn
+          values:
+            - rancher-syd-prod
+
 targetCustomizations:
   - name: k3s-lhm-prod
     clusterSelector:
@@ -31,11 +40,6 @@ targetCustomizations:
       valuesFiles:
         - values/production.yaml
       takeOwnership: true
-
-  - name: rancher-syd-prod
-    clusterSelector:
-      matchLabels:
-        sigaint.au/cluster-id: rancher-syd-prod
 
 diff:
   comparePatches:
