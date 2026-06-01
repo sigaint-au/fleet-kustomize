@@ -56,10 +56,12 @@ Components are deployed selectively using Fleet `targetCustomizations` and `depe
 
 - Long-lived secrets are delivered via External Secrets Operator from Doppler.
 - The initial Doppler authentication secret must be created manually on each cluster before the first sync.
-- k3s clusters are bootstrapped with Traefik disabled and WireGuard-native flannel (exact commands are environment-specific and maintained separately).
+- k3s clusters are bootstrapped with Traefik disabled and WireGuard-native flannel. See [docs/installation.md](docs/installation.md) for the exact commands used in this environment.
 
 ## Requirements
 
 - Rancher with Fleet
 - Target clusters labeled according to the scheme above
 - Network access from clusters to configured chart repositories and backup storage
+
+See [docs/installation.md](docs/installation.md) for k3s bootstrap instructions.
