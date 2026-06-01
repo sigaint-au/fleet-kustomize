@@ -2,14 +2,36 @@
 defaultNamespace: metallb-system
 labels:
   component: metallb-operator-install
-helm:
-  repo: https://metallb.github.io/metallb
-  chart: metallb
-  version: 0.16.1
-  releaseName: metallb
-  valuesFiles:
-    - values/production.yaml
-  takeOwnership: true
+
+# Deploy MetalLB Helm chart only on the k3s-lhm clusters.
+# Do NOT deploy on syd-rancher-prod (Sydney), which uses hostNetwork Traefik.
+targetCustomizations:
+  - name: k3s-lhm-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-prod
+    helm:
+      repo: https://metallb.github.io/metallb
+      chart: metallb
+      version: 0.16.1
+      releaseName: metallb
+      valuesFiles:
+        - values/production.yaml
+      takeOwnership: true
+
+  - name: k3s-lhm-devel
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-devel
+    helm:
+      repo: https://metallb.github.io/metallb
+      chart: metallb
+      version: 0.16.1
+      releaseName: metallb
+      valuesFiles:
+        - values/production.yaml
+      takeOwnership: true
+
 diff:
   comparePatches:
     - apiVersion: admissionregistration.k8s.io/v1
