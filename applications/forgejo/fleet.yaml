@@ -7,6 +7,17 @@ labels:
   component: forgejo-install
 
 targetCustomizations:
+
+  - name: k3s-prod-lhm
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-prod-lhm
+
+  - name: k3s-devel-lhm
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-devel-lhm
+
   - name: rancher-syd-prod
     clusterSelector:
       matchLabels:
