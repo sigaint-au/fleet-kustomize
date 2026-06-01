@@ -5,6 +5,7 @@ labels:
 helm:
   repo: https://metallb.github.io/metallb
   chart: metallb
+  version: 0.16.1
   releaseName: metallb
   valuesFiles:
     - values/production.yaml

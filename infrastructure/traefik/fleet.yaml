@@ -16,6 +16,10 @@ targetCustomizations:
     helm:
       valuesFiles:
         - values/k3s-lhm-prod.yaml
+    dependsOn:
+      - selector:
+          matchLabels:
+            component: metallb-operator-install
 
   - name: k3s-lhm-devel
     clusterSelector:
@@ -24,6 +28,10 @@ targetCustomizations:
     helm:
       valuesFiles:
         - values/k3s-lhm-devel.yaml
+    dependsOn:
+      - selector:
+          matchLabels:
+            component: metallb-operator-install
 
   - name: rancher-syd-prod
     clusterSelector:

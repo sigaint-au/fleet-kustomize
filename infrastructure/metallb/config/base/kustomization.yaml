@@ -1,3 +1,2 @@
-resources: []
-# Helm chart does not deploy this.
-#  - metallb.yaml
+resources:
+  - metallb.yaml

@@ -2,11 +2,11 @@
 ---
 defaultNamespace: monitoring
 labels:
-  component: persus-install
+  component: perses-install
 
 helm:
   repo: https://perses.github.io/helm-charts
   version: 0.53.1
-  releaseName: persus
+  releaseName: perses
   valuesFiles:
     - values/production.yaml

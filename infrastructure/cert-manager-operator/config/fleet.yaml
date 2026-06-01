@@ -20,4 +20,4 @@ dependsOn:
         component: cert-manager-operator-install
   - selector:
       matchLabels:
-        component: external-secrets-operato-install
+        component: external-secrets-operator-install

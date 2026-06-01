@@ -1,7 +1,7 @@
 # fleet.yaml
 defaultNamespace: external-secrets
 labels:
-  component: external-secrets-operato-install
+  component: external-secrets-operator-install
 helm:
   repo: https://charts.external-secrets.io
   chart: external-secrets

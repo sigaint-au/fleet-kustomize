@@ -8,7 +8,7 @@ configuration:
       provider: aws
       bucket: my-k8s-backups
       config:
-        region: us-west-001 =
+        region: us-west-000
         s3Url: https://s3.us-west-000.backblazeb2.com
         s3ForcePathStyle: "true"
 

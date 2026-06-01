@@ -21,4 +21,4 @@ dependsOn:
         component: velero-install
   - selector:
       matchLabels:
-        component: external-secrets-operato-install
+        component: external-secrets-operator-install
