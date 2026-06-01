@@ -8,8 +8,7 @@ targetCustomizations:
       matchLabels:
         sigaint.au/cluster-id: syd-rancher-prod
     helm:
-      repo: oci://code.forgejo.org/forgejo-helm
-      chart: forgejo
+      repo: oci://code.forgejo.org/forgejo-helm/forgeo
       version: 16.0.2
       releaseName: forgejo
       valuesFiles:
