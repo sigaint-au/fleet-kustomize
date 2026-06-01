@@ -1,8 +1,3 @@
-# fleet.yaml
-#
-# Deploys the Forgejo Helm chart to the Sydney cluster only.
-# Requires the supporting resources bundle (ExternalSecret + Namespace)
-# to be deployed first via applications/forgejo/config/base/
 defaultNamespace: forgejo
 labels:
   component: forgejo-install
@@ -13,7 +8,7 @@ targetCustomizations:
       matchLabels:
         sigaint.au/cluster-id: syd-rancher-prod
     helm:
-      chart: oci://code.forgejo.org/forgejo-helm
+      repo: oci://code.forgejo.org/forgejo-helm
       chart: forgejo
       version: 16.0.2
       releaseName: forgejo
