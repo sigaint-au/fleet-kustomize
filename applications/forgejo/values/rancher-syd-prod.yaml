@@ -8,7 +8,7 @@
 
 gitea:
   admin:
-    username: "admin"
+    username: "admin_local"
     email: "admin@sigaint.au"
     # Password is injected via extraEnv below (from ExternalSecret)
 
