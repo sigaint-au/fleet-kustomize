@@ -57,9 +57,8 @@ gitea:
     - enabled: true
       name: "FreeIPA"
       host: "idm-8b64.de.sigaint.au"
-      port: "389"
-      use_ssl: false
-      start_tls: true
+      port: "636"
+      use_ssl: true
       bind_dn: "uid=svc-ldap-bind,cn=users,cn=accounts,dc=sigaint,dc=au"
       # Password is injected via the env var above (from ExternalSecret)
       bind_password: ""
