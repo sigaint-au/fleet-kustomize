@@ -1,4 +1,4 @@
-# Values for Forgejo on git.sigaint.au (syd-rancher-prod cluster)
+# Values for Forgejo on git.sigaint.au (rancher-syd-prod cluster)
 #
 # Chart: oci://code.forgejo.org/forgejo-helm/forgejo
 #

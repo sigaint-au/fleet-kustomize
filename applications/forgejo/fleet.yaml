@@ -3,16 +3,16 @@ labels:
   component: forgejo-install
 
 targetCustomizations:
-  - name: syd-rancher-prod
+  - name: rancher-syd-prod
     clusterSelector:
       matchLabels:
-        sigaint.au/cluster-id: syd-rancher-prod
+        sigaint.au/cluster-id: rancher-syd-prod
     helm:
       repo: oci://code.forgejo.org/forgejo-helm/forgeo
       version: 16.0.2
       releaseName: forgejo
       valuesFiles:
-        - values/syd-rancher-prod.yaml
+        - values/rancher-syd-prod.yaml
 
 dependsOn:
   - selector:

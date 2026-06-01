@@ -8,9 +8,9 @@ labels:
   component: forgejo-config
 
 targetCustomizations:
-  - name: syd-rancher-prod
+  - name: rancher-syd-prod
     clusterSelector:
       matchLabels:
-        sigaint.au/cluster-id: syd-rancher-prod
+        sigaint.au/cluster-id: rancher-syd-prod
     kustomize:
       dir: overlays/clusters/syd-rancher-prod
