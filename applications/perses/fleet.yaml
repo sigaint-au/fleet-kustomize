@@ -21,7 +21,7 @@ targetCustomizations:
           operator: In
           values:
             - k3s-lhm-prod
-            - rancher-syd-prod
+            - k3s-lhm-devel
 
   - name: exclude-others
     clusterSelector: {}

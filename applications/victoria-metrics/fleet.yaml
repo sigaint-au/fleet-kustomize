@@ -9,26 +9,30 @@ helm:
   chart: victoria-metrics-cluster
   releaseName: vmcluster
 
-
 targetCustomizations:
-  - name: production
+  - name: k3s-lhm-prod
     clusterSelector:
-      matchLabels:
-        sigaint.au/environment: production
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
     helm:
       valuesFiles:
         - values/production.yaml
 
-  - name: development
+  - name: k3s-lhm-devel
     clusterSelector:
-      matchLabels:
-        sigaint.au/environment: development
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-devel
     helm:
       valuesFiles:
         - values/development.yaml
 
-  # victoria-metrics by environment on downstream clusters (env overrides above).
-  # Catch-all excludes local mgmt cluster (and any cluster not matching earlier env selectors).
+
   - name: exclude-others
     clusterSelector: {}
     doNotDeploy: true
