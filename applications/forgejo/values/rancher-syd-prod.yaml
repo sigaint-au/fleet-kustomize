@@ -10,7 +10,7 @@ gitea:
   admin:
     username: "admin_local"
     email: "admin@sigaint.au"
-    password: "7WjvawDqZizdbAzz2IhT6PbdlpDtO1b6"
+    existingSecret: forgejo-admin-external
     # Password is injected via extraEnv below (from ExternalSecret)
 
   config:
@@ -44,38 +44,6 @@ gitea:
         secretKeyRef:
           name: forgejo-ldap-bind
           key: bind-password
-
-    # Initial admin user password (only used on first startup if the user doesn't exist)
-    - name: GITEA_ADMIN_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: forgejo-admin-external
-          key: password
-
-  # LDAP (FreeIPA) configuration
-  # Note: Must be an array (list) because of the chart's values schema.
-  ldap:
-    - enabled: true
-      name: "FreeIPA"
-      host: "idm-8b64.de.sigaint.au"
-      port: "636"
-      use_ssl: true
-      bind_dn: "uid=svc-ldap-bind,cn=users,cn=accounts,dc=sigaint,dc=au"
-      # Password is injected via the env var above (from ExternalSecret)
-      bind_password: ""
-      user_base: "cn=users,cn=accounts,dc=sigaint,dc=au"
-      user_dn_search_base: "cn=users,cn=accounts,dc=sigaint,dc=au"
-      user_filter: "(&(uid=%[1]s)(objectClass=posixAccount))"
-      admin_filter: "(memberOf=cn=admins,cn=groups,cn=accounts,dc=sigaint,dc=au)"
-      email_attribute: "mail"
-      uid_attribute: "uid"
-      username_attribute: "uid"
-      firstname_attribute: "givenName"
-      surname_attribute: "sn"
-      avatar_attribute: ""
-      attributes_in_bind: false
-      synchronize_users: true
-      allow_deactivate_all: false
 
 ingress:
   enabled: true
