@@ -71,7 +71,7 @@ ingress:
 # Minimal persistence (adjust storageClass if needed)
 persistence:
   enabled: true
-  size: 100Gi
+  size: 20Gi
 
 # Use a single replica for minimal deployment
 replicaCount: 1
