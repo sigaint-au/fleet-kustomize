@@ -26,3 +26,9 @@ targetCustomizations:
     helm:
       valuesFiles:
         - values/development.yaml
+
+  # victoria-metrics by environment on downstream clusters (env overrides above).
+  # Catch-all excludes local mgmt cluster (and any cluster not matching earlier env selectors).
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

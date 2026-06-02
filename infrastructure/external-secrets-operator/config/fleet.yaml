@@ -14,6 +14,12 @@ targetCustomizations:
     kustomize:
       dir: overlays/development
 
+  # Supporting kustomize resources per env on downstream (env selectors above).
+  # Catch-all excludes local mgmt cluster and any non-matching clusters.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
+
 
 dependsOn:
   - selector:

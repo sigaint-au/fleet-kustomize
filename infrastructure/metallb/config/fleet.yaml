@@ -1,13 +1,4 @@
 # fleet.yaml
-
-targetRestrictions:
-  - clusterSelector:
-      matchExpressions:
-        - key:  sigaint.au/cluster-id
-          operator: NotIn
-          values:
-            - rancher-syd-prod
-
 targetCustomizations:
   - name: k3s-lhm-prod
     clusterSelector:
@@ -22,10 +13,11 @@ targetCustomizations:
     kustomize:
       dir: overlays/clusters/k3s-lhm-devel
 
-  - name: rancher-syd-prod
-    clusterSelector:
-      matchLabels:
-        sigaint.au/cluster-id: rancher-syd-prod
+  # Only the two k3s-lhm clusters get the MetalLB objects (kustomize dirs above).
+  # Everything else (rancher-syd-prod, local mgmt, unknowns) is excluded.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
 
 dependsOn:
   - selector:

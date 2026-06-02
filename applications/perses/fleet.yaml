@@ -10,3 +10,19 @@ helm:
   releaseName: perses
   valuesFiles:
     - values/production.yaml
+
+targetCustomizations:
+  # Perses only on production downstream clusters (uses root production values).
+  # Single matchExpressions IN since no per-cluster specific config in the customizations.
+  - name: production-downstream
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+            - rancher-syd-prod
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

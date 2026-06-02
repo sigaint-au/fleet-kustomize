@@ -9,3 +9,21 @@ helm:
   releaseName: external-secrets
   values:
     installCRDs: true
+
+targetCustomizations:
+  # Common operators (root helm + values) for the downstream clusters.
+  # Use a single matchExpressions IN list when there is no per-cluster specific config.
+  # Catch-all doNotDeploy excludes local mgmt cluster and everything else.
+  - name: downstream-clusters
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+            - k3s-lhm-devel
+            - rancher-syd-prod
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

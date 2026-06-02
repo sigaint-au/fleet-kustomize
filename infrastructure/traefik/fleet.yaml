@@ -40,3 +40,9 @@ targetCustomizations:
     helm:
       valuesFiles:
         - values/rancher-syd-prod.yaml
+
+  # Traefik on all three downstream clusters (per-cluster overrides above).
+  # Catch-all with empty selector excludes local mgmt cluster and unknowns.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

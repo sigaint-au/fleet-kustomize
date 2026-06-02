@@ -6,26 +6,7 @@ defaultNamespace: forgejo
 labels:
   component: forgejo-install
 
-targetRestrictions:
-  - clusterSelector:
-      matchExpressions:
-        - key:  sigaint.au/cluster-id
-          operator: NotIn
-          values:
-            - k3s-prod-lhm
-            - k3s-devel-lhm
-
 targetCustomizations:
-
-  - name: k3s-prod-lhm
-    clusterSelector:
-      matchLabels:
-        sigaint.au/cluster-id: k3s-prod-lhm
-
-  - name: k3s-devel-lhm
-    clusterSelector:
-      matchLabels:
-        sigaint.au/cluster-id: k3s-devel-lhm
 
   - name: rancher-syd-prod
     clusterSelector:
@@ -37,6 +18,11 @@ targetCustomizations:
       releaseName: forgejo
       valuesFiles:
         - values/rancher-syd-prod.yaml
+
+  # Forgejo only on rancher-syd-prod (config above).
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
 
 dependsOn:
   - selector:

@@ -19,3 +19,9 @@ targetCustomizations:
         sigaint.au/cluster-id: rancher-syd-prod
     kustomize:
       dir: overlays/clusters/syd-rancher-prod
+
+  # Supporting config only for rancher-syd-prod (kustomize dir above).
+  # Catch-all excludes k3s clusters, local mgmt cluster, and anything else.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

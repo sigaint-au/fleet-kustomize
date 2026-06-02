@@ -8,6 +8,24 @@ helm:
   version: 0.27.1
   releaseName: cnpg
 
+targetCustomizations:
+  # Common operators (root helm) for the downstream clusters.
+  # Use a single matchExpressions IN list when there is no per-cluster specific config.
+  # Catch-all doNotDeploy excludes local mgmt cluster and everything else.
+  - name: downstream-clusters
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+            - k3s-lhm-devel
+            - rancher-syd-prod
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
+
 diff:
   comparePatches:
     - apiVersion: admissionregistration.k8s.io/v1

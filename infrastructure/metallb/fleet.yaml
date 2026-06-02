@@ -3,17 +3,6 @@ defaultNamespace: metallb-system
 labels:
   component: metallb-operator-install
 
-# Deploy MetalLB Helm chart only on the k3s-lhm clusters.
-# Do NOT deploy on syd-rancher-prod (Sydney), which uses hostNetwork Traefik.
-
-targetRestrictions:
-  - clusterSelector:
-      matchExpressions:
-        - key:  sigaint.au/cluster-id
-          operator: NotIn
-          values:
-            - rancher-syd-prod
-
 targetCustomizations:
   - name: k3s-lhm-prod
     clusterSelector:
@@ -40,6 +29,13 @@ targetCustomizations:
       valuesFiles:
         - values/production.yaml
       takeOwnership: true
+
+  # Only the two k3s-lhm clusters get the MetalLB operator (with their config above).
+  # Everything else (rancher-syd-prod, local mgmt cluster, unknowns) hits the
+  # catch-all and is not deployed.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
 
 diff:
   comparePatches:
