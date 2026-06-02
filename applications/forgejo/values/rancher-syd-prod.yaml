@@ -3,15 +3,17 @@
 # Chart: oci://code.forgejo.org/forgejo-helm/forgejo
 #
 # Note: The Helm chart is deployed via Fleet's native helm: section (see fleet.yaml).
-# Supporting resources (ExternalSecrets for LDAP password, CA cert, and admin password)
+# Supporting resources (ExternalSecrets for LDAP, admin, and mailer config)
 # are deployed from applications/forgejo/config/base/ as a separate bundle.
+#
+# Mailer config is injected securely via additionalConfigSources + a dedicated
+# ExternalSecret (see explanation in the additionalConfigSources section below
+# and the ExternalSecret definitions).
 
 gitea:
   admin:
-    username: "admin_local"
-    email: "admin@sigaint.au"
     existingSecret: forgejo-admin-external
-    # Password is injected via extraEnv below (from ExternalSecret)
+    passwordMode: keepUpdated
 
   config:
     server:
@@ -37,13 +39,19 @@ gitea:
       mountPath: /data/freeipa-ca
       readOnly: true
 
-  # Inject secrets from External Secrets Operator (Doppler)
-  env:
-    - name: FORGEJO__LDAP__BIND_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: forgejo-ldap-bind
-          key: bind-password
+  # additionalConfigSources lets the chart mount extra Secrets/ConfigMaps.
+  # Their keys (named in FORGEJO__section__KEY format) are turned into env vars
+  # by the init container and merged into app.ini via environment-to-ini.
+  # This is the secure way to provide sensitive config like mailer passwords
+  # without plaintext in Git/values.
+  #
+  # Here we include:
+  # - gitea-app-ini-additional : (expected to exist; holds other custom app.ini bits,
+  #   e.g. OAuth, not managed in this repo's ExternalSecrets yet)
+  # - forgejo-mailer-config    : populated by the ExternalSecret below for [mailer] settings.
+  additionalConfigSources:
+    - secret:
+        secretName: forgejo-mailer-config
 
 ingress:
   enabled: true
@@ -63,8 +71,7 @@ ingress:
 # Minimal persistence (adjust storageClass if needed)
 persistence:
   enabled: true
-  size: 10Gi
-  # storageClass: longhorn   # uncomment if you have a preferred class
+  size: 100Gi
 
 # Use a single replica for minimal deployment
 replicaCount: 1

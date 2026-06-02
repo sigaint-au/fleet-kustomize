@@ -7,6 +7,7 @@
 #   - forgejo namespace
 #   - forgejo-ldap-bind secret (LDAP bind password + FreeIPA CA cert)
 #   - forgejo-admin secret (initial admin password)
+#   - forgejo-mailer-config secret (mailer settings for app.ini, via additionalConfigSources)
 
 defaultNamespace: forgejo
 labels:
