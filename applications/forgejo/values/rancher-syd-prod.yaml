@@ -52,6 +52,8 @@ gitea:
   additionalConfigSources:
     - secret:
         secretName: forgejo-mailer-config
+    - secret:
+        secretName: forgejo-storage-config
 
 ingress:
   enabled: true
