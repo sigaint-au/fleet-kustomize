@@ -20,6 +20,8 @@ gitea:
       DOMAIN: git.sigaint.au
       ROOT_URL: https://git.sigaint.au/
       PROTOCOL: http   # TLS terminated at Ingress
+      DISABLE_SSH: true
+      START_SSH_SERVER: false
 
     security:
       # Trust the FreeIPA CA certificate (mounted from the ExternalSecret-managed Secret below)
