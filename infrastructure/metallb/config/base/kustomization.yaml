@@ -1,2 +1,2 @@
-resources:
-  - metallb.yaml
+resources: []
+#  - metallb.yaml
