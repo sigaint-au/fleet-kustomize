@@ -13,6 +13,7 @@ infrastructure/          # Core platform components
   cert-manager-operator/
   cloudnative-pg/
   external-secrets-operator/
+  harvester-csi-driver/
   metallb/
   traefik/
   velero/
@@ -32,6 +33,7 @@ applications/            # Workload applications
 | Traefik                    | Helm                | All clusters           | LoadBalancer on k3s-lhm clusters; hostNetwork DaemonSet on rancher-syd-prod |
 | Velero                     | Helm + Kustomize    | All clusters           | Backups to Backblaze B2 via AWS-compatible plugin |
 | CloudNativePG              | Helm                | All clusters           | PostgreSQL operator |
+| Harvester CSI Driver       | Helm                | `k3s-lhm-*`            | Enables Harvester-backed storage in guest clusters (requires one-time Harvester-side setup — see [docs/harvester-csi-driver.md](docs/harvester-csi-driver.md)) |
 | VictoriaMetrics Cluster    | Helm                | By environment         | Metrics storage & querying |
 | Perses                     | Helm                | Production             | Observability dashboards |
 

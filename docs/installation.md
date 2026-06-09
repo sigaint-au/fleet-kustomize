@@ -68,6 +68,8 @@ After the cluster is up:
 
 4. Ensure the initial Doppler token secret is created in the `external-secrets` namespace before Fleet attempts to deploy `external-secrets-operator`.
 
+5. For `k3s-lhm-prod` and `k3s-lhm-devel` (Harvester guest clusters), enable the Harvester CSI driver so the clusters can consume storage from the underlying Harvester. This requires both the Fleet component and a one-time registration step on the Harvester cluster using the `generate_addon_csi.sh` script. See [Harvester CSI Driver](harvester-csi-driver.md) for the full procedure (including bastion commands).
+
 ## Verification
 
 - Check node status: `kubectl get nodes`
