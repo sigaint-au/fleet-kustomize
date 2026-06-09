@@ -24,7 +24,7 @@ ingress:
 persistence:
   enabled: true
   size: 10Gi
-  storageClass: longhorn
+  storageClass: local-path
 
 replicas: 1
 
