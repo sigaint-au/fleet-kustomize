@@ -1,0 +1,28 @@
+# fleet.yaml
+defaultNamespace: kube-system
+labels:
+  component: harvester-csi-driver-install
+
+helm:
+  repo: https://charts.harvesterhci.io/
+  chart: harvester-csi-driver
+  version: 0.1.28
+  releaseName: harvester-csi-driver
+
+targetCustomizations:
+  # Harvester CSI driver only on the Harvester-backed k3s clusters (k3s-lhm-*).
+  # These clusters run as guests on Harvester and need the CSI driver to consume
+  # Harvester volumes (Longhorn-backed storage exposed via Harvester).
+  - name: k3s-lhm-clusters
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+            - k3s-lhm-devel
+
+  # Exclude all other clusters (rancher-syd-prod, local mgmt, etc.).
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
