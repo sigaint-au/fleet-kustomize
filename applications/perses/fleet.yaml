@@ -9,7 +9,8 @@ labels:
 
 helm:
   repo: https://perses.github.io/helm-charts
-  version: 0.53.1
+  version:  0.53.1
+  chart: perses
   releaseName: perses
 
 targetCustomizations:
