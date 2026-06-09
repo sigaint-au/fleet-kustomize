@@ -1,5 +1,8 @@
 # fleet.yaml
 ---
+# Perses observability dashboards.
+# Requires the supporting bundle at applications/perses/config/
+# (environment overlays provide Zitadel OIDC client credentials via ExternalSecret).
 defaultNamespace: monitoring
 labels:
   component: perses-install
@@ -8,21 +11,29 @@ helm:
   repo: https://perses.github.io/helm-charts
   version: 0.53.1
   releaseName: perses
-  valuesFiles:
-    - values/production.yaml
 
 targetCustomizations:
-  # Perses only on production downstream clusters (uses root production values).
-  # Single matchExpressions IN since no per-cluster specific config in the customizations.
-  - name: production-downstream
+  - name: k3s-lhm-prod
     clusterSelector:
-      matchExpressions:
-        - key: sigaint.au/cluster-id
-          operator: In
-          values:
-            - k3s-lhm-prod
-            - k3s-lhm-devel
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-prod
+    helm:
+      valuesFiles:
+        - values/production.yaml
+
+  - name: k3s-lhm-devel
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-devel
+    helm:
+      valuesFiles:
+        - values/development.yaml
 
   - name: exclude-others
     clusterSelector: {}
     doNotDeploy: true
+
+dependsOn:
+  - selector:
+      matchLabels:
+        component: perses-config

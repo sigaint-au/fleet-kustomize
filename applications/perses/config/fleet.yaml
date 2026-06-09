@@ -1,0 +1,36 @@
+# fleet.yaml for supporting resources (ExternalSecret) for Perses.
+#
+# This bundle creates the Kubernetes Secret (via ExternalSecret + Doppler)
+# that holds the Zitadel OIDC client ID and secret for the environment.
+# It is injected into the Perses deployment using the Helm chart's existing-Secret mechanism.
+#
+# Environment-specific overlays (overlays/production, overlays/development)
+# provide the correct Doppler remote keys (separate clients per environment).
+#
+# The main Perses Helm chart (applications/perses/fleet.yaml) depends on this
+# bundle via component: perses-config.
+
+defaultNamespace: monitoring
+labels:
+  component: perses-config
+
+targetCustomizations:
+  - name: production
+    clusterSelector:
+      matchLabels:
+        sigaint.au/environment: production
+    kustomize:
+      dir: overlays/production
+
+  - name: development
+    clusterSelector:
+      matchLabels:
+        sigaint.au/environment: development
+    kustomize:
+      dir: overlays/development
+
+  # Supporting kustomize resources per environment on downstream clusters.
+  # Catch-all excludes local mgmt cluster and any non-matching clusters.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

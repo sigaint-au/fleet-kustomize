@@ -1,25 +1,25 @@
-# Values for Perses on production downstream clusters (k3s-lhm-prod, k3s-lhm-devel).
+# Values for Perses on the development cluster (k3s-lhm-devel).
 #
 # Chart: https://perses.github.io/helm-charts (perses/perses)
 #
 # OIDC is configured to use Zitadel. Client ID and secret are delivered via
-# ExternalSecret (see applications/perses/config/overlays/production) from Doppler
-# and injected as environment variables. Environment variables override the YAML
-# config for sensitive fields (PERSES_SECURITY_AUTHENTICATION_PROVIDERS_OIDC_0_*).
+# ExternalSecret (see applications/perses/config/overlays/development) from Doppler
+# and injected as environment variables.
 
 ingress:
   enabled: true
   annotations:
+    # cert-manager will handle TLS via ClusterIssuer
     cert-manager.io/cluster-issuer: le-production
   hosts:
-    - host: perses.sigaint.au
+    - host: perses.apps.k3s.lhm.devel.sigaint.au
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: perses-sigaint-au-tls
       hosts:
-        - perses.sigaint.au
+        - perses.apps.k3s.lhm.devel.sigaint.au
 
 persistence:
   enabled: true
@@ -41,10 +41,11 @@ config:
           - slug_id: zitadel
             name: "Single Sign On"
             issuer: "https://auth.sigaint.au"
-            redirect_uri: "https://perses.sigaint.au/api/auth/providers/oidc/zitadel/callback"
+            redirect_uri: "https://perses.apps.k3s.lhm.devel.sigaint.au/api/auth/providers/oidc/zitadel/callback"
             scopes: ["openid", "profile", "email"]
             logout:
               enabled: true
+
 secret:
   create: false
   name: perses-zitadel-oidc

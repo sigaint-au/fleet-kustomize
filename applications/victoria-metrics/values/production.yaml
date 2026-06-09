@@ -1,5 +1,5 @@
 vminsert:
-  replicaCount: 2
+  replicaCount: 1
   resources:
     requests:
       cpu: 500m
@@ -9,7 +9,7 @@ vmselect:
   replicaCount: 2
 
 vmstorage:
-  replicaCount: 3
+  replicaCount: 1
   persistentVolume:
     enabled: true
     size: 100Gi
