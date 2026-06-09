@@ -6,9 +6,9 @@ deployment:
   hostNetwork: true
   dnsPolicy: ClusterFirstWithHostNet
 
-# Target the specific node
-nodeSelector:
-  kubernetes.io/hostname: rancher-a163.syd.prod.sigaint.au
+## Target the specific node
+#nodeSelector:
+#  kubernetes.io/hostname: rancher-1894.syd.prod.sigaint.au
 
 # Tolerate the custom taint
 tolerations:
