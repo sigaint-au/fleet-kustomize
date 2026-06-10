@@ -5,6 +5,10 @@
 # OIDC is configured to use Zitadel. Client ID and secret are delivered via
 # ExternalSecret (see applications/perses/config/overlays/development) from Doppler.
 #
+# IMPORTANT: We request "profile" scope (for preferred_username) but NOT "email" scope,
+# so Perses uses preferred_username (e.g. "mhahl-a") as the user subject name for RBAC bindings
+# instead of email.
+#
 # The Perses Helm chart auto-generates env entries (for OIDC client secrets + any
 # entries from the envVars list below) and references them via secretKeyRef using
 # the kebab-cased version of the PERSES_ name. All such keys must exist in the
@@ -17,9 +21,9 @@
 # Authorization / permissions (using OIDC groups from Zitadel, Perses inbuilt RBAC only):
 # - Native provider enabled via PERSES_SECURITY_AUTHORIZATION_NATIVE_ENABLE env var.
 # - guest_permissions left empty.
-# - RBAC objects (GlobalRole + GlobalRoleBindings for rol-perses-access and rol-perses-admin, plus direct for mhahl-a)
-#   are delivered via extraObjects ConfigMap + volume mount into provisioning folder.
-#   No Kubernetes sidecar / native RBAC is used for provisioning.
+# - RBAC objects (GlobalRole + GlobalRoleBindings for rol-perses-access and rol-perses-admin, plus direct for mhahl-a using preferred_username)
+#   are delivered via extraObjects ConfigMap (labeled for sidecar) + sidecar provisioning into the folder.
+#   No Kubernetes native RBAC is used for Perses user permissions (only inbuilt Perses GlobalRole/GlobalRoleBinding).
 # - IMPORTANT: For groups to be picked up, the OIDC token must contain a "groups" claim (array of strings like ["rol-perses-access", "rol-perses-admin"]).
 #   This usually requires a Zitadel Action to set the claim from the user's roles. Re-login after changes.
 #
@@ -61,7 +65,7 @@ config:
             name: "Single Sign On"
             issuer: "https://auth.sigaint.au"
             redirect_uri: "https://perses.apps.k3s.lhm.devel.sigaint.au/api/auth/providers/oidc/zitadel/callback"
-            scopes: ["openid", "profile", "email", "groups"]
+            scopes: ["openid", "profile", "groups"]
             logout:
               enabled: true
 
