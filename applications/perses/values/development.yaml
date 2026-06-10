@@ -5,12 +5,12 @@
 # OIDC is configured to use Zitadel. Client ID and secret are delivered via
 # ExternalSecret (see applications/perses/config/overlays/development) from Doppler.
 #
-# The Perses Helm chart auto-generates env entries for the OIDC providers
-# (from the authentication.providers.oidc list) and references them via
-# secretKeyRef. The keys in the Secret must be kebab-cased versions of the
-# PERSES_ names, e.g.:
+# The Perses Helm chart auto-generates env entries (for OIDC client secrets + any
+# entries from the envVars list below) and references them via secretKeyRef using
+# the kebab-cased version of the PERSES_ name. All such keys must exist in the
+# external Secret (perses-zitadel-oidc). Examples:
 #   perses-security-authentication-providers-oidc-0-client-id
-#   perses-security-authentication-providers-oidc-0-client-secret
+#   perses-security-authorization-native-enable
 #
 # These env vars override the config at runtime using Perses' PERSES_ convention.
 #
@@ -99,9 +99,12 @@ secret:
   create: false
   name: perses-zitadel-oidc
 
-# Enable the native authorization provider (required for RoleBindings / groups to work).
-# This is done via env var because the Helm chart's values schema is restrictive
-# on config.security.authorization (only guest_permissions and check_latest_update_interval are allowed directly).
+# Enable the native authorization provider (required so that the group-based
+# GlobalRoleBindings we provision via the sidecar actually grant permissions).
+# We cannot put the full 'native: { enable: true }' under config.security.authorization
+# because the chart's values.schema.json only allows 'guest_permissions' there.
+# Instead we use the envVars list; the chart will then create a secretKeyRef
+# for the kebab-cased key, which we populate in the ExternalSecret (perses-zitadel-oidc).
 envVars:
   - name: PERSES_SECURITY_AUTHORIZATION_NATIVE_ENABLE
     value: "true"
