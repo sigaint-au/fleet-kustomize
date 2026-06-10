@@ -15,7 +15,8 @@
 # These env vars override the config at runtime using Perses' PERSES_ convention.
 #
 # Authorization / permissions (using OIDC groups from Zitadel):
-# - Native provider (guest_permissions empty — access is group-based only).
+# - Native provider enabled via PERSES_SECURITY_AUTHORIZATION_NATIVE_ENABLE env var.
+# - guest_permissions left empty (schema allows only limited fields here).
 # - Sidecar + extraObjects ConfigMap provisions:
 #     rol-perses-access  → perses-access role (read/login)
 #     rol-perses-admin   → global-admin (full admin)
@@ -58,18 +59,16 @@ config:
             name: "Single Sign On"
             issuer: "https://auth.sigaint.au"
             redirect_uri: "https://perses.apps.k3s.lhm.devel.sigaint.au/api/auth/providers/oidc/zitadel/callback"
-            scopes: ["openid", "profile", "email"]
+            scopes: ["openid", "profile", "email", "urn:zitadel:iam:org:project:roles"]
             logout:
               enabled: true
 
     # Authorization (RBAC) for logged-in users coming from Zitadel OIDC.
-    # guest_permissions are now empty: only users who are members of the
-    # configured OIDC groups (via RoleBindings below) will have access.
+    # guest_permissions must be placed directly here due to the Helm chart's values.schema.json
+    # (it rejects 'provider' or 'native' under authorization).
+    # The native provider itself is enabled via the PERSES_ env var (see envVars below).
     authorization:
-      provider:
-        native:
-          enable: true
-          guest_permissions: []   # no access without explicit group binding
+      guest_permissions: []   # access is controlled exclusively via the GlobalRoleBindings provisioned below
 
 # Datasources for VictoriaMetrics and Victoria Logs (both deployed in the monitoring namespace).
 # - VictoriaMetrics uses the Prometheus-compatible API on vmselect.
@@ -99,6 +98,13 @@ datasources:
 secret:
   create: false
   name: perses-zitadel-oidc
+
+# Enable the native authorization provider (required for RoleBindings / groups to work).
+# This is done via env var because the Helm chart's values schema is restrictive
+# on config.security.authorization (only guest_permissions and check_latest_update_interval are allowed directly).
+envVars:
+  - name: PERSES_SECURITY_AUTHORIZATION_NATIVE_ENABLE
+    value: "true"
 
 # Enable sidecar for provisioning resources (including RBAC RoleBindings)
 # from ConfigMaps labeled with perses.dev/resource: "true".
