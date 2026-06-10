@@ -5,8 +5,9 @@
 # OIDC auth via Zitadel. Secrets via ExternalSecret from Doppler.
 # Datasources for VictoriaMetrics (Prometheus compat) and VictoriaLogs (Loki compat).
 #
-# Note: grafana.ini uses ${VAR} syntax for Grafana's runtime env substitution (from the 'env' section below).
-# The values are flat (no 'grafana:' wrapper) to match the chart's expected structure.
+# Note: grafana.ini uses Go template to emit literal ${VAR} (for Grafana's runtime env substitution from the 'env' section below).
+# This avoids Fleet treating bare ${} or {{GF_...}} as template functions.
+# Values are flat (no 'grafana:' wrapper).
 
 admin:
   existingSecret: grafana-admin
@@ -19,8 +20,8 @@ grafana.ini:
   auth.generic_oauth:
     enabled: true
     name: Zitadel
-    client_id: ${GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
-    client_secret: ${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+    client_id: {{ "${GF_AUTH_GENERIC_OAUTH_CLIENT_ID}" | quote }}
+    client_secret: {{ "${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}" | quote }}
     scopes: openid profile email
     auth_url: https://auth.sigaint.au/oauth/v2/authorize
     token_url: https://auth.sigaint.au/oauth/v2/token
