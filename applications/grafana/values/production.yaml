@@ -37,7 +37,7 @@ ldap:
     ssl_skip_verify = false
     root_ca_cert = "/etc/grafana/ldap-ca/ca.crt"
     bind_dn = "uid=svc-ldap-bind,cn=users,cn=accounts,dc=sigaint,dc=au"
-    bind_password = "${GF_LDAP_BIND_PASSWORD}"
+    bind_password = "$__env{GF_LDAP_BIND_PASSWORD}"
     search_base_dns = ["cn=users,cn=accounts,dc=sigaint,dc=au"]
     search_filter = "(&(objectClass=posixAccount)(uid=%s))"
     group_search_base_dns = ["cn=groups,cn=accounts,dc=sigaint,dc=au"]
