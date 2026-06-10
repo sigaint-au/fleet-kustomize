@@ -3,8 +3,16 @@
 # Chart: https://perses.github.io/helm-charts (perses/perses)
 #
 # OIDC is configured to use Zitadel. Client ID and secret are delivered via
-# ExternalSecret (see applications/perses/config/overlays/development) from Doppler
-# and injected as environment variables.
+# ExternalSecret (see applications/perses/config/overlays/development) from Doppler.
+#
+# The Perses Helm chart auto-generates env entries for the OIDC providers
+# (from the authentication.providers.oidc list) and references them via
+# secretKeyRef. The keys in the Secret must be kebab-cased versions of the
+# PERSES_ names, e.g.:
+#   perses-security-authentication-providers-oidc-0-client-id
+#   perses-security-authentication-providers-oidc-0-client-secret
+#
+# These env vars override the config at runtime using Perses' PERSES_ convention.
 
 ingress:
   enabled: true
