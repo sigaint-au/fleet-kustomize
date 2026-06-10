@@ -17,9 +17,11 @@
 # Authorization / permissions (using OIDC groups from Zitadel, Perses inbuilt RBAC only):
 # - Native provider enabled via PERSES_SECURITY_AUTHORIZATION_NATIVE_ENABLE env var.
 # - guest_permissions left empty.
-# - RBAC objects (GlobalRole + GlobalRoleBindings for rol-perses-access and rol-perses-admin)
+# - RBAC objects (GlobalRole + GlobalRoleBindings for rol-perses-access and rol-perses-admin, plus direct for mhahl-a)
 #   are delivered via extraObjects ConfigMap + volume mount into provisioning folder.
 #   No Kubernetes sidecar / native RBAC is used for provisioning.
+# - IMPORTANT: For groups to be picked up, the OIDC token must contain a "groups" claim (array of strings like ["rol-perses-access", "rol-perses-admin"]).
+#   This usually requires a Zitadel Action to set the claim from the user's roles. Re-login after changes.
 #
 # Datasources configured for VictoriaMetrics + Victoria Logs (see below for details).
 
@@ -58,7 +60,7 @@ config:
             name: "Single Sign On"
             issuer: "https://auth.sigaint.au"
             redirect_uri: "https://perses.sigaint.au/api/auth/providers/oidc/zitadel/callback"
-            scopes: ["openid", "profile", "email", "urn:zitadel:iam:org:project:roles"]
+            scopes: ["openid", "profile", "email", "groups"]
             logout:
               enabled: true
 
@@ -121,9 +123,10 @@ volumeMounts:
   - name: perses-rbac
     mountPath: /etc/perses/provisioning/rbac
 
-# Extra objects: provision GlobalRole + RoleBindings using OIDC groups from Zitadel.
-# - rol-perses-access : basic read/login access (via custom GlobalRole)
-# - rol-perses-admin  : full global administrator access (via built-in global-admin)
+# Extra objects: provision GlobalRole + RoleBindings using OIDC groups from Zitadel (and direct user for mhahl-a).
+# - rol-perses-access group : basic read/login access (via custom GlobalRole "perses-access")
+# - rol-perses-admin group  : full global-admin (via built-in role)
+# - mhahl-a user            : full global-admin (direct, as fallback)
 extraObjects:
   - apiVersion: v1
     kind: ConfigMap
@@ -132,8 +135,7 @@ extraObjects:
       labels:
         perses.dev/resource: "true"
     data:
-      perses-rbac.yaml: |
-        # Base role for users who should be able to log in and view
+      00-global-role-perses-access.yaml: |
         kind: GlobalRole
         metadata:
           name: perses-access
@@ -141,8 +143,7 @@ extraObjects:
           permissions:
             - actions: ["read"]
               scopes: ["*"]
-        ---
-        # Bind the access group (users in this Zitadel group can log in with read access)
+      01-global-role-binding-perses-access.yaml: |
         kind: GlobalRoleBinding
         metadata:
           name: perses-access-users
@@ -151,8 +152,7 @@ extraObjects:
           subjects:
             - kind: Group
               name: rol-perses-access
-        ---
-        # Bind the admin group to the built-in global-admin role
+      02-global-role-binding-perses-admin.yaml: |
         kind: GlobalRoleBinding
         metadata:
           name: perses-admin-users
@@ -161,3 +161,12 @@ extraObjects:
           subjects:
             - kind: Group
               name: rol-perses-admin
+      03-global-role-binding-mhahl-a.yaml: |
+        kind: GlobalRoleBinding
+        metadata:
+          name: mhahl-a-admin
+        spec:
+          role: global-admin
+          subjects:
+            - kind: User
+              name: mhahl-a
