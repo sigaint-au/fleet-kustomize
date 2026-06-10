@@ -1,8 +1,8 @@
 # Values for Grafana on development (k3s-lhm-devel)
 #
-# Chart: https://grafana.github.io/helm-charts (grafana)
+# Chart: https://grafana-community.github.io/helm-charts (grafana) v12.4.4+
 #
-# LDAP auth (FreeIPA-style, replacing OIDC). Bind credentials (LDAP_BIND_PASSWORD) and CA cert (LDAP_BIND_CA_CERT) via ExternalSecret from Doppler (grafana-ldap-bind secret).
+# LDAP auth (FreeIPA-style). Bind credentials (LDAP_BIND_PASSWORD) and CA cert (LDAP_BIND_CA_CERT) via ExternalSecret from Doppler (grafana-ldap-bind secret).
 # Datasources for VictoriaMetrics (Prometheus compat) and VictoriaLogs (Loki compat).
 # LDAP group mappings in ldap.toml:
 # - grp-sigaint-admins -> Admin role
@@ -11,7 +11,7 @@
 # Recommended pattern (per grafana/helm-charts issues + community):
 # - Secret keys named exactly GF_... so `envFromSecret: grafana-ldap-bind` works (clean).
 # - LDAP bind password injected via env.
-# - CA cert mounted for LDAPS.
+# - CA cert mounted via extraSecretMounts (required; using extraVolumes+secret: results in emptyDir because chart _pod.tpl falls back to emptyDir:{} for unknown volume types).
 # Values are flat (no 'grafana:' wrapper) to match the chart.
 
 admin:
@@ -37,7 +37,7 @@ ldap:
     start_tls = false
     ssl_skip_verify = false
     root_ca_cert = "/etc/grafana/ldap-ca/ca.crt"
-    bind_dn = "uid=perses-bind,cn=users,cn=accounts,dc=sigaint,dc=au"
+    bind_dn = "uid=svc-ldap-bind,cn=users,cn=accounts,dc=sigaint,dc=au"
     bind_password = "$__env{GF_LDAP_BIND_PASSWORD}"
     search_base_dns = ["cn=users,cn=accounts,dc=sigaint,dc=au"]
     search_filter = "(&(objectClass=posixAccount)(uid=%s))"
@@ -94,15 +94,15 @@ persistence:
   size: 10Gi
   storageClassName: harvester
 
-extraVolumes:
+# Use extraSecretMounts (not extraVolumes) because the chart's _pod.tpl only handles
+# secret volumes via extraSecretMounts (with secretName+items); generic extraVolumes
+# without a known type (existingClaim/hostPath/etc) falls back to emptyDir:{}.
+# This was causing the "ldap-ca is an empty dir in the pod".
+extraSecretMounts:
   - name: ldap-ca
-    secret:
-      secretName: grafana-ldap-bind
-      items:
-        - key: ca.crt
-          path: ca.crt
-
-extraVolumeMounts:
-  - name: ldap-ca
+    secretName: grafana-ldap-bind
     mountPath: /etc/grafana/ldap-ca
     readOnly: true
+    items:
+      - key: ca.crt
+        path: ca.crt

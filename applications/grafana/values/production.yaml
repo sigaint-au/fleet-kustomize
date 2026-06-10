@@ -1,15 +1,15 @@
 # Values for Grafana on production (k3s-lhm-prod)
 #
-# Chart: https://grafana.github.io/helm-charts (grafana)
+# Chart: https://grafana-community.github.io/helm-charts (grafana) v12.4.4+
 #
-# LDAP auth (FreeIPA-style, replacing OIDC). Bind credentials (LDAP_BIND_PASSWORD) and CA cert (LDAP_BIND_CA_CERT) via ExternalSecret from Doppler (grafana-ldap-bind secret).
+# LDAP auth (FreeIPA-style). Bind credentials (LDAP_BIND_PASSWORD) and CA cert (LDAP_BIND_CA_CERT) via ExternalSecret from Doppler (grafana-ldap-bind secret).
 # Datasources for VictoriaMetrics (Prometheus compat) and VictoriaLogs (Loki compat).
 # LDAP group mappings in ldap.toml:
 # - grp-sigaint-admins -> Admin role
 # - grp-sigaint-users -> Viewer role
 #
 # LDAP configuration uses a mounted ldap.toml (via the chart's ldap.config) with bind password from env.
-# CA cert mounted separately for LDAPS.
+# CA cert mounted via extraSecretMounts (required; extraVolumes with secret: falls back to emptyDir in this chart version).
 # RBAC via LDAP group mappings (grp-sigaint-admins -> Admin, grp-sigaint-users -> Viewer).
 # No OIDC.
 
@@ -93,15 +93,15 @@ persistence:
   size: 10Gi
   storageClassName: harvester
 
-extraVolumes:
+# Use extraSecretMounts (not extraVolumes) because the chart's _pod.tpl only handles
+# secret volumes via extraSecretMounts (with secretName+items); generic extraVolumes
+# without a known type (existingClaim/hostPath/etc) falls back to emptyDir:{}.
+# This was causing the "ldap-ca is an empty dir in the pod".
+extraSecretMounts:
   - name: ldap-ca
-    secret:
-      secretName: grafana-ldap-bind
-      items:
-        - key: ca.crt
-          path: ca.crt
-
-extraVolumeMounts:
-  - name: ldap-ca
+    secretName: grafana-ldap-bind
     mountPath: /etc/grafana/ldap-ca
     readOnly: true
+    items:
+      - key: ca.crt
+        path: ca.crt
