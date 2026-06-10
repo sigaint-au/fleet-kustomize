@@ -13,7 +13,7 @@ vmstorage:
   persistentVolume:
     enabled: true
     size: 10Gi
-    storageClass: "longhorn"
+    storageClass: "harvester"
   retentionPeriod: "5d"
 
 vmauth:
