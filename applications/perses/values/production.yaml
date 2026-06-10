@@ -69,10 +69,12 @@ config:
     authorization:
       guest_permissions: []   # access is controlled exclusively via the GlobalRoleBindings provisioned below
 
-    provisioning:
-      folders:
-        - /etc/perses/provisioning
-        - /etc/perses/provisioning/rbac   # mounted ConfigMap with Perses RBAC objects (GlobalRole, GlobalRoleBindings)
+  # provisioning is at the config level (sibling to security), not under security.
+  # This is required by the chart schema.
+  provisioning:
+    folders:
+      - /etc/perses/provisioning
+      - /etc/perses/provisioning/rbac   # mounted ConfigMap with Perses RBAC objects (GlobalRole, GlobalRoleBindings)
 
 # Datasources for VictoriaMetrics and Victoria Logs (both deployed in the monitoring namespace).
 # - VictoriaMetrics uses the Prometheus-compatible API on vmselect.
