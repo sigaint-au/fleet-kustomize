@@ -102,8 +102,8 @@ secret:
 # GlobalRoleBindings we provision via the sidecar actually grant permissions).
 # We cannot put the full 'native: { enable: true }' under config.security.authorization
 # because the chart's values.schema.json only allows 'guest_permissions' there.
-# Instead we use the envVars list; the chart will then create a secretKeyRef
-# for the kebab-cased key, which we populate in the ExternalSecret (perses-zitadel-oidc).
+# We declare it in envVars so the chart generates the corresponding secretKeyRef
+# (kebab-cased key). The value is supplied via the ExternalSecret below (from Doppler).
 envVars:
   - name: PERSES_SECURITY_AUTHORIZATION_NATIVE_ENABLE
     value: "true"
