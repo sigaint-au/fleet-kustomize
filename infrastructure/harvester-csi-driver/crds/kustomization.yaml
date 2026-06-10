@@ -1,0 +1,4 @@
+resources:
+  - volumesnapshotclasses.yaml
+  - volumesnapshots.yaml
+  - volumesnapshotcontents.yaml

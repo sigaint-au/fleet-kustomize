@@ -1,0 +1,29 @@
+# fleet.yaml for Harvester CSI snapshot CRDs.
+#
+# These CRDs (VolumeSnapshot, VolumeSnapshotContent, VolumeSnapshotClass)
+# are required before the harvester-csi-driver Helm chart can be applied,
+# because the chart unconditionally creates a default VolumeSnapshotClass
+# named "harvester-snapshot".
+#
+# This bundle must be applied before the main harvester-csi-driver Helm release
+# on k3s-lhm-* clusters (which are plain k3s and do not have these CRDs by default).
+
+defaultNamespace: kube-system
+labels:
+  component: harvester-csi-driver-crds
+
+targetCustomizations:
+  - name: k3s-lhm-clusters
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+            - k3s-lhm-devel
+    kustomize:
+      dir: .
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
