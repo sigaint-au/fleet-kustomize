@@ -58,10 +58,9 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: le-production
   hosts:
-    - host: grafana.sigaint.au
-      paths:
-        - path: /
-          pathType: Prefix
+    - grafana.sigaint.au
+  path: /
+  pathType: Prefix
   tls:
     - secretName: grafana-sigaint-au-tls
       hosts:

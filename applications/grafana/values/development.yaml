@@ -56,10 +56,9 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: le-production
   hosts:
-    - host: grafana.apps.k3s.lhm.devel.sigaint.au
-      paths:
-        - path: /
-          pathType: Prefix
+    - grafana.apps.k3s.lhm.devel.sigaint.au
+  path: /
+  pathType: Prefix
   tls:
     - secretName: grafana-k3s-lhm-devel-tls
       hosts:
