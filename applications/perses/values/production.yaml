@@ -13,6 +13,8 @@
 #   perses-security-authentication-providers-oidc-0-client-secret
 #
 # These env vars override the config at runtime using Perses' PERSES_ convention.
+#
+# Datasources configured for VictoriaMetrics + Victoria Logs (see below for details).
 
 ingress:
   enabled: true
@@ -52,6 +54,32 @@ config:
             scopes: ["openid", "profile", "email"]
             logout:
               enabled: true
+
+# Datasources for VictoriaMetrics and Victoria Logs (both deployed in the monitoring namespace).
+# - VictoriaMetrics uses the Prometheus-compatible API on vmselect.
+# - Victoria Logs uses the Loki-compatible API (port 9428).
+#
+# The victoria-metrics-cluster chart (release: vmcluster) creates the vmselect service.
+# Victoria Logs is typically exposed as the "vlogs" service (from victoria-logs-single or similar).
+datasources:
+  - kind: GlobalDatasource
+    metadata:
+      name: VictoriaMetrics
+    spec:
+      default: true
+      plugin:
+        kind: PrometheusDatasource
+        spec:
+          directUrl: http://vmcluster-vmselect:8481/select/0/prometheus
+  - kind: GlobalDatasource
+    metadata:
+      name: VictoriaLogs
+    spec:
+      plugin:
+        kind: LokiDatasource
+        spec:
+          directUrl: http://vlogs:9428
+
 secret:
   create: false
   name: perses-zitadel-oidc
