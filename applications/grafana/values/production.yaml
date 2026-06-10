@@ -5,9 +5,12 @@
 # OIDC auth via Zitadel. Secrets via ExternalSecret from Doppler.
 # Datasources for VictoriaMetrics (Prometheus compat) and VictoriaLogs (Loki compat).
 #
-# Note: grafana.ini uses Go template to emit literal ${VAR} (for Grafana's runtime env substitution from the 'env' section below).
-# This avoids Fleet treating bare ${} or {{GF_...}} as template functions.
-# Values are flat (no 'grafana:' wrapper).
+# Recommended pattern (per grafana/helm-charts issues + community):
+# - Secret keys named exactly GF_... so `envFromSecret: grafana-oidc` works (clean, no per-var valueFrom in git).
+# - Use $__env{GF_...} (or ${}) placeholders in grafana.ini for Grafana's runtime substitution.
+# - The Go template + single quotes around the expression is only to keep raw values.yaml valid
+#   under Fleet's Go template pre-rendering + strict YAML parsing.
+# Values are flat (no 'grafana:' wrapper) to match the chart.
 
 admin:
   existingSecret: grafana-admin
@@ -19,10 +22,10 @@ grafana.ini:
     root_url: https://grafana.sigaint.au/
   auth.generic_oauth:
     enabled: true
-    name: Zitadel
-    client_id: {{ "${GF_AUTH_GENERIC_OAUTH_CLIENT_ID}" | quote }}
-    client_secret: {{ "${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}" | quote }}
-    scopes: openid profile email
+    name: "Single Sign On"
+    client_id: '${__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}'
+    client_secret: '${__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}'
+    scopes: "openid profile email"
     auth_url: https://auth.sigaint.au/oauth/v2/authorize
     token_url: https://auth.sigaint.au/oauth/v2/token
     api_url: https://auth.sigaint.au/oidc/v1/userinfo
@@ -30,17 +33,7 @@ grafana.ini:
     # Add role mapping if using groups from Zitadel, e.g.
     # role_attribute_path: contains(groups[*], 'grafana-admin') && 'Admin' || contains(groups[*], 'grafana-editor') && 'Editor' || 'Viewer'
 
-env:
-  GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
-    valueFrom:
-      secretKeyRef:
-        name: grafana-oidc
-        key: client-id
-  GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
-    valueFrom:
-      secretKeyRef:
-        name: grafana-oidc
-        key: client-secret
+envFromSecret: grafana-oidc
 
 datasources:
   datasources.yaml:
