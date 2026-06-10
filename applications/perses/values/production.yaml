@@ -14,12 +14,12 @@
 #
 # These env vars override the config at runtime using Perses' PERSES_ convention.
 #
-# Authorization / permissions (using OIDC groups from Zitadel):
+# Authorization / permissions (using OIDC groups from Zitadel, Perses inbuilt RBAC only):
 # - Native provider enabled via PERSES_SECURITY_AUTHORIZATION_NATIVE_ENABLE env var.
-# - guest_permissions left empty (schema allows only limited fields here).
-# - Sidecar + extraObjects ConfigMap provisions:
-#     rol-perses-access  → perses-access role (read/login)
-#     rol-perses-admin   → global-admin (full admin)
+# - guest_permissions left empty.
+# - RBAC objects (GlobalRole + GlobalRoleBindings for rol-perses-access and rol-perses-admin)
+#   are delivered via extraObjects ConfigMap + volume mount into provisioning folder.
+#   No Kubernetes sidecar / native RBAC is used for provisioning.
 #
 # Datasources configured for VictoriaMetrics + Victoria Logs (see below for details).
 
@@ -69,6 +69,11 @@ config:
     authorization:
       guest_permissions: []   # access is controlled exclusively via the GlobalRoleBindings provisioned below
 
+    provisioning:
+      folders:
+        - /etc/perses/provisioning
+        - /etc/perses/provisioning/rbac   # mounted ConfigMap with Perses RBAC objects (GlobalRole, GlobalRoleBindings)
+
 # Datasources for VictoriaMetrics and Victoria Logs (both deployed in the monitoring namespace).
 # - VictoriaMetrics uses the Prometheus-compatible API on vmselect.
 # - Victoria Logs uses the Loki-compatible API (port 9428).
@@ -98,28 +103,25 @@ secret:
   create: false
   name: perses-zitadel-oidc
 
-# Enable the native authorization provider (required so that the group-based
-# GlobalRoleBindings we provision via the sidecar actually grant permissions).
-# We cannot put the full 'native: { enable: true }' under config.security.authorization
-# because the chart's values.schema.json only allows 'guest_permissions' there.
-# We declare it in envVars so the chart generates the corresponding secretKeyRef
-# (kebab-cased key). The value is supplied via the ExternalSecret below (from Doppler).
 envVars:
   - name: PERSES_SECURITY_AUTHORIZATION_NATIVE_ENABLE
     value: "true"
 
-# Enable sidecar for provisioning resources (including RBAC RoleBindings)
-# from ConfigMaps labeled with perses.dev/resource: "true".
-# This allows declarative management of permissions.
-sidecar:
-  enabled: true
-  label: "perses.dev/resource"
-  labelValue: "true"
-  allNamespaces: true  # watch for resource ConfigMaps (including in this namespace)
+# Mount the RBAC ConfigMap (created via extraObjects) into the provisioning folder.
+# This lets Perses' built-in provisioning load the GlobalRole and GlobalRoleBindings
+# on startup/interval. No sidecar (and thus no extra Kubernetes RBAC) is used.
+volumes:
+  - name: perses-rbac
+    configMap:
+      name: perses-global-rbac
+
+volumeMounts:
+  - name: perses-rbac
+    mountPath: /etc/perses/provisioning/rbac
 
 # Extra objects: provision GlobalRole + RoleBindings using OIDC groups from Zitadel.
-# - rol-perses-access : basic read/login access
-# - rol-perses-admin  : full global administrator access
+# - rol-perses-access : basic read/login access (via custom GlobalRole)
+# - rol-perses-admin  : full global administrator access (via built-in global-admin)
 extraObjects:
   - apiVersion: v1
     kind: ConfigMap
