@@ -94,8 +94,7 @@ persistence:
   size: 10Gi
   storageClassName: harvester
 
-# Mount LDAP CA cert from the secret (for LDAPS)
-volumes:
+extraVolumes:
   - name: ldap-ca
     secret:
       secretName: grafana-ldap-bind
@@ -103,7 +102,7 @@ volumes:
         - key: ca.crt
           path: ca.crt
 
-volumeMounts:
+extraVolumeMounts:
   - name: ldap-ca
     mountPath: /etc/grafana/ldap-ca
     readOnly: true
