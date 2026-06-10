@@ -23,8 +23,8 @@ grafana.ini:
   auth.generic_oauth:
     enabled: true
     name: "Single Sign On"
-    client_id: '${__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}'
-    client_secret: '${__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}'
+    client_id: '$__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}'
+    client_secret: '$__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}'
     scopes: "openid profile email"
     auth_url: https://auth.sigaint.au/oauth/v2/authorize
     token_url: https://auth.sigaint.au/oauth/v2/token
