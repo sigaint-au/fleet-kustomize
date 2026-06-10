@@ -19,7 +19,7 @@ infrastructure/          # Core platform components
   velero/
 
 applications/            # Workload applications
-  perses/
+  grafana/
   victoria-metrics/
 ```
 
@@ -35,7 +35,7 @@ applications/            # Workload applications
 | CloudNativePG              | Helm                | All clusters           | PostgreSQL operator |
 | Harvester CSI Driver       | Helm                | `k3s-lhm-*`            | Enables Harvester-backed storage in guest clusters (requires one-time Harvester-side setup — see [docs/harvester-csi-driver.md](docs/harvester-csi-driver.md)) |
 | VictoriaMetrics Cluster    | Helm                | By environment         | Metrics storage & querying |
-| Perses                     | Helm                | Production             | Observability dashboards |
+| Grafana                    | Helm                | By environment         | Observability dashboards with OIDC (Zitadel) and VictoriaMetrics/VictoriaLogs datasources |
 
 ## Cluster Targeting
 

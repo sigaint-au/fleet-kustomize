@@ -1,0 +1,81 @@
+# Values for Grafana on production (k3s-lhm-prod)
+#
+# Chart: https://grafana.github.io/helm-charts (grafana)
+#
+# OIDC auth via Zitadel. Secrets via ExternalSecret from Doppler.
+# Datasources for VictoriaMetrics (Prometheus compat) and VictoriaLogs (Loki compat).
+
+grafana:
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+
+  grafana.ini:
+    server:
+      root_url: https://grafana.sigaint.au/
+      # domain and other if needed
+    auth.generic_oauth:
+      enabled: true
+      name: Zitadel
+      client_id: ${GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
+      client_secret: ${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+      scopes: openid profile email
+      auth_url: https://auth.sigaint.au/oauth/v2/authorize
+      token_url: https://auth.sigaint.au/oauth/v2/token
+      api_url: https://auth.sigaint.au/oidc/v1/userinfo
+      allow_sign_up: true
+      # Add role mapping if using groups from Zitadel, e.g.
+      # role_attribute_path: contains(groups[*], 'grafana-admin') && 'Admin' || contains(groups[*], 'grafana-editor') && 'Editor' || 'Viewer'
+
+  env:
+    GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
+      valueFrom:
+        secretKeyRef:
+          name: grafana-oidc
+          key: client-id
+    GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: grafana-oidc
+          key: client-secret
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: VictoriaMetrics
+          type: prometheus
+          access: proxy
+          url: http://vmcluster-vmselect:8481/select/0/prometheus
+          isDefault: true
+          jsonData:
+            httpMethod: POST
+        - name: VictoriaLogs
+          type: loki
+          access: proxy
+          url: http://vlogs:9428
+          jsonData:
+            maxLines: 1000
+
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: le-production
+    hosts:
+      - host: grafana.sigaint.au
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: grafana-sigaint-au-tls
+        hosts:
+          - grafana.sigaint.au
+
+  # Persistence if needed
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: harvester
+
+  # Use sidecar for config if needed, but datasources via values ok.

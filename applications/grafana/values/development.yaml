@@ -1,0 +1,75 @@
+# Values for Grafana on development (k3s-lhm-devel)
+#
+# Chart: https://grafana.github.io/helm-charts (grafana)
+#
+# OIDC auth via Zitadel. Secrets via ExternalSecret from Doppler.
+# Datasources for VictoriaMetrics (Prometheus compat) and VictoriaLogs (Loki compat).
+
+grafana:
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+
+  grafana.ini:
+    server:
+      root_url: https://grafana.apps.k3s.lhm.devel.sigaint.au/
+    auth.generic_oauth:
+      enabled: true
+      name: Zitadel
+      client_id: ${GF_AUTH_GENERIC_OAUTH_CLIENT_ID}
+      client_secret: ${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+      scopes: openid profile email
+      auth_url: https://auth.sigaint.au/oauth/v2/authorize
+      token_url: https://auth.sigaint.au/oauth/v2/token
+      api_url: https://auth.sigaint.au/oidc/v1/userinfo
+      allow_sign_up: true
+
+  env:
+    GF_AUTH_GENERIC_OAUTH_CLIENT_ID:
+      valueFrom:
+        secretKeyRef:
+          name: grafana-oidc
+          key: client-id
+    GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: grafana-oidc
+          key: client-secret
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: VictoriaMetrics
+          type: prometheus
+          access: proxy
+          url: http://vmcluster-vmselect:8481/select/0/prometheus
+          isDefault: true
+          jsonData:
+            httpMethod: POST
+        - name: VictoriaLogs
+          type: loki
+          access: proxy
+          url: http://vlogs:9428
+          jsonData:
+            maxLines: 1000
+
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: le-production
+    hosts:
+      - host: grafana.apps.k3s.lhm.devel.sigaint.au
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: grafana-k3s-lhm-devel-tls
+        hosts:
+          - grafana.apps.k3s.lhm.devel.sigaint.au
+
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: harvester

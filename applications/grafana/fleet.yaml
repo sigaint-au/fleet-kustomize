@@ -1,0 +1,42 @@
+# fleet.yaml for Grafana
+defaultNamespace: monitoring
+labels:
+  component: grafana-install
+
+helm:
+  repo: https://grafana.github.io/helm-charts
+  chart: grafana
+  version: 7.3.0
+  releaseName: grafana
+
+targetCustomizations:
+  - name: k3s-lhm-prod
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+    helm:
+      valuesFiles:
+        - values/production.yaml
+
+  - name: k3s-lhm-devel
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-devel
+    helm:
+      valuesFiles:
+        - values/development.yaml
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
+
+dependsOn:
+  - selector:
+      matchLabels:
+        component: grafana-config
