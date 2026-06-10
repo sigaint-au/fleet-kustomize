@@ -39,9 +39,8 @@ ldap:
     bind_dn = "uid=svc-ldap-bind,cn=users,cn=accounts,dc=sigaint,dc=au"
     bind_password = "$__env{GF_LDAP_BIND_PASSWORD}"
     search_base_dns = ["cn=users,cn=accounts,dc=sigaint,dc=au"]
-    search_filter = "(&(objectClass=posixAccount)(uid=%s))"
+    search_filter = "(uid=%s)"
     group_search_base_dns = ["cn=groups,cn=accounts,dc=sigaint,dc=au"]
-    group_search_filter = "(&(objectClass=posixGroup)(member=%s))"
     [servers.attributes]
     name = "givenName"
     surname = "sn"
@@ -51,6 +50,8 @@ ldap:
     [[servers.group_mappings]]
     group_dn = "cn=grp-sigaint-admins,cn=groups,cn=accounts,dc=sigaint,dc=au"
     org_role = "Admin"
+    org_id = 1
+    
     [[servers.group_mappings]]
     group_dn = "cn=grp-sigaint-users,cn=groups,cn=accounts,dc=sigaint,dc=au"
     org_role = "Viewer"
