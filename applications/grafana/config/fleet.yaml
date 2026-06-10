@@ -1,4 +1,4 @@
-# fleet.yaml for Grafana supporting resources (secrets)
+# fleet.yaml for Grafana supporting resources (admin secret + LDAP bind secret + CA cert)
 defaultNamespace: monitoring
 labels:
   component: grafana-config

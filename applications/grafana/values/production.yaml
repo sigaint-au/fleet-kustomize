@@ -2,15 +2,16 @@
 #
 # Chart: https://grafana.github.io/helm-charts (grafana)
 #
-# OIDC auth via Zitadel. Secrets via ExternalSecret from Doppler.
+# LDAP auth (FreeIPA-style, replacing OIDC). Bind credentials (LDAP_BIND_PASSWORD) and CA cert (LDAP_BIND_CA_CERT) via ExternalSecret from Doppler (grafana-ldap-bind secret).
 # Datasources for VictoriaMetrics (Prometheus compat) and VictoriaLogs (Loki compat).
+# LDAP group mappings in ldap.toml:
+# - grp-sigaint-admins -> Admin role
+# - grp-sigaint-users -> Viewer role
 #
-# Recommended pattern (per grafana/helm-charts issues + community):
-# - Secret keys named exactly GF_... so `envFromSecret: grafana-oidc` works (clean, no per-var valueFrom in git).
-# - Use $__env{GF_...} (or ${}) placeholders in grafana.ini for Grafana's runtime substitution.
-# - The Go template + single quotes around the expression is only to keep raw values.yaml valid
-#   under Fleet's Go template pre-rendering + strict YAML parsing.
-# Values are flat (no 'grafana:' wrapper) to match the chart.
+# LDAP configuration uses a mounted ldap.toml (via the chart's ldap.config) with bind password from env.
+# CA cert mounted separately for LDAPS.
+# RBAC via LDAP group mappings (grp-sigaint-admins -> Admin, grp-sigaint-users -> Viewer).
+# No OIDC.
 
 admin:
   existingSecret: grafana-admin
@@ -20,20 +21,41 @@ admin:
 grafana.ini:
   server:
     root_url: https://grafana.sigaint.au/
-  auth.generic_oauth:
+  auth.ldap:
     enabled: true
-    name: "Single Sign On"
-    client_id: '$__env{GF_AUTH_GENERIC_OAUTH_CLIENT_ID}'
-    client_secret: '$__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}'
-    scopes: "openid profile email"
-    auth_url: https://auth.sigaint.au/oauth/v2/authorize
-    token_url: https://auth.sigaint.au/oauth/v2/token
-    api_url: https://auth.sigaint.au/oidc/v1/userinfo
+    config_file: /etc/grafana/ldap.toml
     allow_sign_up: true
-    # Add role mapping if using groups from Zitadel, e.g.
-    # role_attribute_path: contains(groups[*], 'grafana-admin') && 'Admin' || contains(groups[*], 'grafana-editor') && 'Editor' || 'Viewer'
 
-envFromSecret: grafana-oidc
+ldap:
+  enabled: true
+  config: |
+    [[servers]]
+    host = "idm-8b64.de.sigaint.au"
+    port = 636
+    use_ssl = true
+    start_tls = false
+    ssl_skip_verify = false
+    root_ca_cert = "/etc/grafana/ldap-ca/ca.crt"
+    bind_dn = "uid=svc-ldap-bind,cn=users,cn=accounts,dc=sigaint,dc=au"
+    bind_password = "${GF_LDAP_BIND_PASSWORD}"
+    search_base_dns = ["cn=users,cn=accounts,dc=sigaint,dc=au"]
+    search_filter = "(&(objectClass=posixAccount)(uid=%s))"
+    group_search_base_dns = ["cn=groups,cn=accounts,dc=sigaint,dc=au"]
+    group_search_filter = "(&(objectClass=posixGroup)(member=%s))"
+    [servers.attributes]
+    name = "givenName"
+    surname = "sn"
+    username = "uid"
+    member_of = "memberOf"
+    email = "mail"
+    [[servers.group_mappings]]
+    group_dn = "cn=grp-sigaint-admins,cn=groups,cn=accounts,dc=sigaint,dc=au"
+    org_role = "Admin"
+    [[servers.group_mappings]]
+    group_dn = "cn=grp-sigaint-users,cn=groups,cn=accounts,dc=sigaint,dc=au"
+    org_role = "Viewer"
+
+envFromSecret: grafana-ldap-bind
 
 datasources:
   datasources.yaml:
@@ -71,4 +93,16 @@ persistence:
   size: 10Gi
   storageClassName: harvester
 
-# Use sidecar for config if needed, but datasources via values ok.
+# Mount LDAP CA cert from the secret (for LDAPS)
+volumes:
+  - name: ldap-ca
+    secret:
+      secretName: grafana-ldap-bind
+      items:
+        - key: ca.crt
+          path: ca.crt
+
+volumeMounts:
+  - name: ldap-ca
+    mountPath: /etc/grafana/ldap-ca
+    readOnly: true
