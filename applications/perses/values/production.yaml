@@ -14,6 +14,12 @@
 #
 # These env vars override the config at runtime using Perses' PERSES_ convention.
 #
+# Authorization / permissions (using OIDC groups from Zitadel):
+# - Native provider (guest_permissions empty — access is group-based only).
+# - Sidecar + extraObjects ConfigMap provisions:
+#     rol-perses-access  → perses-access role (read/login)
+#     rol-perses-admin   → global-admin (full admin)
+#
 # Datasources configured for VictoriaMetrics + Victoria Logs (see below for details).
 
 ingress:
@@ -55,6 +61,15 @@ config:
             logout:
               enabled: true
 
+    # Authorization (RBAC) for logged-in users coming from Zitadel OIDC.
+    # guest_permissions are now empty: only users who are members of the
+    # configured OIDC groups (via RoleBindings below) will have access.
+    authorization:
+      provider:
+        native:
+          enable: true
+          guest_permissions: []   # no access without explicit group binding
+
 # Datasources for VictoriaMetrics and Victoria Logs (both deployed in the monitoring namespace).
 # - VictoriaMetrics uses the Prometheus-compatible API on vmselect.
 # - Victoria Logs uses the Loki-compatible API (port 9428).
@@ -83,3 +98,53 @@ datasources:
 secret:
   create: false
   name: perses-zitadel-oidc
+
+# Enable sidecar for provisioning resources (including RBAC RoleBindings)
+# from ConfigMaps labeled with perses.dev/resource: "true".
+# This allows declarative management of permissions.
+sidecar:
+  enabled: true
+  label: "perses.dev/resource"
+  labelValue: "true"
+  allNamespaces: true  # watch for resource ConfigMaps (including in this namespace)
+
+# Extra objects: provision GlobalRole + RoleBindings using OIDC groups from Zitadel.
+# - rol-perses-access : basic read/login access
+# - rol-perses-admin  : full global administrator access
+extraObjects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: perses-global-rbac
+      labels:
+        perses.dev/resource: "true"
+    data:
+      perses-rbac.yaml: |
+        # Base role for users who should be able to log in and view
+        kind: GlobalRole
+        metadata:
+          name: perses-access
+        spec:
+          permissions:
+            - actions: ["read"]
+              scopes: ["*"]
+        ---
+        # Bind the access group (users in this Zitadel group can log in with read access)
+        kind: GlobalRoleBinding
+        metadata:
+          name: perses-access-users
+        spec:
+          role: perses-access
+          subjects:
+            - kind: Group
+              name: rol-perses-access
+        ---
+        # Bind the admin group to the built-in global-admin role
+        kind: GlobalRoleBinding
+        metadata:
+          name: perses-admin-users
+        spec:
+          role: global-admin
+          subjects:
+            - kind: Group
+              name: rol-perses-admin
