@@ -1,0 +1,50 @@
+# Values for falcosidekick on production (k3s-lhm-prod)
+#
+# Chart: https://falcosecurity.github.io/charts (falcosidekick) v0.13.1+
+#
+# Exposes the falcosidekick HTTP endpoint (and status) at:
+#   https://falco.sigaint.au/
+#
+# Web UI (Falcosidekick-UI) enabled with its own ingress at:
+#   https://falco-ui.sigaint.au/
+#
+# Credentials (webui basic auth "user:pass" + redis password for the UI backend)
+# are delivered via ExternalSecret from Doppler (see config/).
+# TLS terminated by Ingress + cert-manager (Let's Encrypt production issuer).
+# Traefik (deployed via Fleet) handles the Ingress on k3s-lhm-* clusters.
+
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: le-production
+  hosts:
+    - host: falco.sigaint.au
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: falco-sigaint-au-tls
+      hosts:
+        - falco.sigaint.au
+
+webui:
+  # Enable the full Falcosidekick-UI dashboard (separate deployment + redis backend)
+  enabled: true
+  # Pull auth (user field as "login:pass") and redis password from the Doppler-managed secret
+  existingSecret: falcosidekick-webui
+  redis:
+    existingSecret: falcosidekick-webui
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: le-production
+    hosts:
+      - host: falco-ui.sigaint.au
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: falco-ui-sigaint-au-tls
+        hosts:
+          - falco-ui.sigaint.au
+

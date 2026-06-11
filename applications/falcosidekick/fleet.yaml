@@ -1,0 +1,38 @@
+# fleet.yaml
+defaultNamespace: falco
+labels:
+  component: falcosidekick-install
+helm:
+  repo: https://falcosecurity.github.io/charts
+  chart: falcosidekick
+  version: 0.13.1
+  releaseName: falcosidekick
+
+targetCustomizations:
+  - name: k3s-lhm-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-prod
+    helm:
+      valuesFiles:
+        - values/production.yaml
+
+  - name: k3s-lhm-devel
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: k3s-lhm-devel
+    helm:
+      valuesFiles:
+        - values/development.yaml
+
+  # Only the two k3s-lhm clusters get falcosidekick (with their per-env hostnames).
+  # Everything else (rancher-syd-prod, local mgmt cluster, unknowns) hits the
+  # catch-all and is not deployed.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
+
+dependsOn:
+  - selector:
+      matchLabels:
+        component: falcosidekick-config

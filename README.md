@@ -19,6 +19,7 @@ infrastructure/          # Core platform components
   velero/
 
 applications/            # Workload applications
+  falcosidekick/
   grafana/
   victoria-metrics/
 ```
@@ -34,6 +35,7 @@ applications/            # Workload applications
 | Velero                     | Helm + Kustomize    | All clusters           | Backups to Backblaze B2 via AWS-compatible plugin |
 | CloudNativePG              | Helm                | All clusters           | PostgreSQL operator |
 | Harvester CSI Driver       | Helm                | `k3s-lhm-*`            | Enables Harvester-backed storage in guest clusters (requires one-time Harvester-side setup — see [docs/harvester-csi-driver.md](docs/harvester-csi-driver.md)) |
+| Falcosidekick              | Helm                | `k3s-lhm-*`            | Event forwarder for Falco + Web UI; per-env hostnames + Ingress; Doppler-managed config/secrets |
 | VictoriaMetrics Cluster    | Helm                | By environment         | Metrics storage & querying |
 | Grafana                    | Helm                | By environment         | Observability dashboards with OIDC (Zitadel) and VictoriaMetrics/VictoriaLogs datasources |
 
