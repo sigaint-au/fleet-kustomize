@@ -15,10 +15,6 @@
 
 replicaCount: 1
 
-config:
-  redis:
-    address: "falcosidekick-ui-redis"
-
 ingress:
   enabled: true
   annotations:
