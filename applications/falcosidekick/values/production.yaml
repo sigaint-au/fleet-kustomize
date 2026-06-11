@@ -13,6 +13,8 @@
 # TLS terminated by Ingress + cert-manager (Let's Encrypt production issuer).
 # Traefik (deployed via Fleet) handles the Ingress on k3s-lhm-* clusters.
 
+replicaCount: 1
+
 ingress:
   enabled: true
   annotations:
@@ -28,9 +30,8 @@ ingress:
         - falco.sigaint.au
 
 webui:
-  # Enable the full Falcosidekick-UI dashboard (separate deployment + redis backend)
+  loglevel: 'debug'
   enabled: true
-  # Pull auth (user field as "login:pass") and redis password from the Doppler-managed secret
   existingSecret: falcosidekick-webui
   redis:
     existingSecret: falcosidekick-webui
