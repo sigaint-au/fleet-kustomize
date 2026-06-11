@@ -15,6 +15,9 @@
 
 replicaCount: 1
 
+config:
+  debug: true
+
 ingress:
   enabled: true
   annotations:
