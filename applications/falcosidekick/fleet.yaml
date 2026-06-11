@@ -31,8 +31,3 @@ targetCustomizations:
   - name: exclude-others
     clusterSelector: {}
     doNotDeploy: true
-
-dependsOn:
-  - selector:
-      matchLabels:
-        component: falcosidekick-config
