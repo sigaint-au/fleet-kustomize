@@ -6,10 +6,10 @@
 #
 # This bundle creates:
 #   - falco namespace (via defaultNamespace + resources)
-#   - falcosidekick-webui secret (webui basic auth user + redis password) pulled from Doppler
+#   - falcosidekick-ui secret (webui basic auth user + redis password) pulled from Doppler
 #
 # Doppler keys expected:
-#   - FALCOSIDEKICK_WEBUI_USER           (value in "login:password" format)
+#   - FALCOSIDEKICK_UI_USER              (value in "login:password" format)  -- for the UI password in falcosidekick-ui secret
 #   - FALCOSIDEKICK_WEBUI_REDIS_PASSWORD (password for the UI's Redis backend)
 #
 # The webui can be further configured (or main falcosidekick outputs) by extending
