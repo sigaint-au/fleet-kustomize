@@ -31,9 +31,9 @@ webui:
   # Enable the full Falcosidekick-UI dashboard (separate deployment + redis backend)
   enabled: true
   # Pull auth (user field as "login:pass") and redis password from the Doppler-managed secret
-  existingSecret: falcosidekick-ui
+  existingSecret: falcosidekick-webui
   redis:
-    existingSecret: falcosidekick-ui
+    existingSecret: falcosidekick-webui
   ingress:
     enabled: true
     annotations:
