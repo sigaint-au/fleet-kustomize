@@ -14,6 +14,9 @@
 # Traefik (deployed via Fleet) handles the Ingress on k3s-lhm-* clusters.
 
 replicaCount: 1
+config:
+  redis:
+    address: "falcosidekick-ui-redis"
 
 ingress:
   enabled: true
@@ -30,11 +33,8 @@ ingress:
         - falco.sigaint.au
 
 webui:
-  loglevel: 'debug'
   enabled: true
-  existingSecret: falcosidekick-webui
-  redis:
-    existingSecret: falcosidekick-webui
+  replicaCount: 1
   ingress:
     enabled: true
     annotations:
