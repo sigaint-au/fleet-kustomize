@@ -21,8 +21,15 @@ spec:
         - name: adguardhome
           image: adguard/adguardhome:v0.107.78
           imagePullPolicy: IfNotPresent
+          # Must include -c/-w: K8s `args` replaces image CMD, which otherwise
+          # points conf at the PVC. Without them, config is written next to the
+          # binary (/opt/adguardhome/) and is lost on every restart (setup wizard).
           args:
             - --no-check-update
+            - -c
+            - /opt/adguardhome/conf/AdGuardHome.yaml
+            - -w
+            - /opt/adguardhome/work
           ports:
             - name: dns-tcp
               containerPort: 53
