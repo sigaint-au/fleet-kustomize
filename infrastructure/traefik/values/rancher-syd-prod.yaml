@@ -1,56 +1,51 @@
 # traefik-values.yaml
+#
+# DaemonSet with hostPort (not hostNetwork): process binds unprivileged
+# container ports; kubelet maps host 80/443/53 → those ports. Avoids
+# "bind: permission denied" as non-root on privileged ports.
 
 deployment:
   enabled: true
   kind: DaemonSet
-  hostNetwork: true
-  dnsPolicy: ClusterFirstWithHostNet
 
 ## Target the specific node
 #nodeSelector:
 #  kubernetes.io/hostname: rancher-1894.syd.prod.sigaint.au
 
-# hostNetwork is top-level in the chart (not only under deployment).
-hostNetwork: true
+# Tolerate the custom taint
+tolerations:
+  - key: "ingress"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
 
-# Chart requires maxUnavailable > 0 with hostNetwork (default is 0).
-updateStrategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxUnavailable: 1
-    maxSurge: 0
-
-# Bind privileged host ports 80/443/53 as non-root.
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop: [ALL]
-    add: [NET_BIND_SERVICE]
-  readOnlyRootFilesystem: true
+# Do not use hostNetwork — chart non-root user cannot bind :80/:443/:53.
+hostNetwork: false
 
 ports:
   web:
-    # hostNetwork: hostPort must match port
-    port: 80
+    port: 8000
     hostPort: 80
     expose:
       default: true
+    exposedPort: 80
   websecure:
-    port: 443
+    port: 8443
     hostPort: 443
     expose:
       default: true
-  # Plain DNS (UDP) — Gateway API UDPRoute → AdGuard ClusterIP :53
+    exposedPort: 443
+  # Plain DNS (UDP). Container listens on 5353; host :53 is mapped via hostPort.
+  # Gateway listener port must match this container port (not hostPort).
   dns:
-    port: 53
+    port: 5353
     hostPort: 53
     protocol: UDP
     expose:
       default: true
     exposedPort: 53
 
-# Since we are using hostNetwork, we don't need the K8s Service
-# to manage a LoadBalancer/NodePort for us.
+# hostPort exposes traffic on each node; no LoadBalancer/NodePort Service.
 service:
   enabled: false
 
@@ -60,18 +55,17 @@ providers:
     # Required for UDPRoute / TCPRoute (experimental Gateway API channel).
     experimentalChannel: true
 
-# Default Gateway (traefik-gateway). Listener ports must match ports.* above.
-# HTTPS stays on Ingress (IngressRoute/Ingress); only HTTP + DNS UDP here.
+# Default Gateway (traefik-gateway). Listener ports = ports.*.port (container).
 gateway:
   enabled: true
   listeners:
     web:
-      port: 80
+      port: 8000
       protocol: HTTP
       namespacePolicy:
         from: All
     dns:
-      port: 53
+      port: 5353
       protocol: UDP
       namespacePolicy:
         from: All
