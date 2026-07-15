@@ -34,10 +34,6 @@ spec:
             - name: http-setup
               containerPort: 3000
               protocol: TCP
-            # Default web port after first-time setup.
-            - name: http
-              containerPort: 80
-              protocol: TCP
           securityContext:
             capabilities:
               add:
