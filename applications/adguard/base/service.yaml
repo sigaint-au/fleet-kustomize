@@ -4,11 +4,13 @@ metadata:
   name: adguard
 spec:
   type: NodePort
+  # Cluster = every node can forward to the one pod (do not use Local).
+  externalTrafficPolicy: Cluster
   selector:
     app.kubernetes.io/name: adguard
   ports:
-    # DNS — NodePort 30053. Host NAT :53 → :30053; do not firewall-open 30053
-    # (accept ctstate DNAT only — see fleet.yaml).
+    # DNS — NodePort 30053. On each node: firewalld rich-rule :53 → :30053
+    # (see fleet.yaml). Do not --add-port 30053 on the host firewall.
     - name: dns-tcp
       port: 53
       targetPort: 53
@@ -20,12 +22,12 @@ spec:
       nodePort: 30053
       protocol: UDP
     # Dashboard / setup UI (also unencrypted DoH backend when allow_unencrypted_doh is on).
-    # Prefer Ingress https://adguard.sigaint.au/ over the NodePort.
+    # Prefer Ingress https://adguard.sigaint.au/; random NodePort is debug-only.
     - name: http
       port: 3000
       targetPort: 3000
       protocol: TCP
-    # DNS-over-TLS — NodePort 30853. Host NAT :853 → :30853; same DNAT-only accept.
+    # DNS-over-TLS — NodePort 30853. Host :853 → :30853 via firewalld (fleet.yaml).
     - name: dot
       port: 853
       targetPort: 853

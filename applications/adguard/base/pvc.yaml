@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: adguard-data
 spec:
+  # Single AdGuard writer; Recreate Deployment strategy when rescheduling.
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn

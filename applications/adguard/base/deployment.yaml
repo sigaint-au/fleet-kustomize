@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: adguard
 spec:
+  # One instance cluster-wide. All nodes still accept DNS via NodePort+NAT
+  # (Service externalTrafficPolicy: Cluster); do not scale or use a DaemonSet.
   replicas: 1
   # RWO PVC cannot be multi-attached across nodes.
   strategy:
@@ -15,6 +17,7 @@ spec:
       labels:
         app.kubernetes.io/name: adguard
     spec:
+      # Pod network only — host :53/:853 come from firewalld → NodePort on every node.
       containers:
         - name: adguardhome
           image: adguard/adguardhome:v0.107.78
@@ -39,7 +42,7 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-            # DNS-over-TLS (NodePort 30853; host :853 via firewall-cmd NAT).
+            # DNS-over-TLS (Service NodePort 30853; host :853 via firewalld).
             - name: dot
               containerPort: 853
               protocol: TCP

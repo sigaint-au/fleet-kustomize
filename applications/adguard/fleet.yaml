@@ -1,48 +1,43 @@
 # AdGuard Home — network-wide DNS ad blocker (rancher-syd-prod only).
-# Deployment + RWO PVC; DNS/DoT via NodePort (no hostNetwork).
 #
-# DNS plain:      NodePort 30053 (TCP/UDP) — NAT host :53 → :30053
-# Dashboard:      https://adguard.sigaint.au/  (port 3000)
-# DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
-# DNS-over-TLS:   NodePort 30853 — NAT host :853 → :30853
-#                 (cert mounted from cert-manager; server name dns.adguard.sigaint.au)
+# Architecture (one instance, all nodes accept DNS):
+#   Client → any node :53 / :853
+#         → firewalld DNAT → NodePort 30053 / 30853
+#         → kube-proxy (externalTrafficPolicy: Cluster)
+#         → single AdGuard Deployment pod (+ RWO PVC)
 #
-# Host firewall (firewalld) — run on every node that should accept client DNS/DoT.
-# Do NOT --add-port the NodePorts (30053/30853); that publishes them to the zone.
-# Accept only traffic that arrived on :53/:853 and was DNATed to the NodePort.
+# Do not: DaemonSet AdGuard, hostNetwork, externalTrafficPolicy: Local,
+#         or --add-port for 30053/30853 on the host firewall.
+#
+# Endpoints:
+#   DNS plain:      any node IP :53   (NAT → NodePort 30053 TCP/UDP)
+#   DNS-over-TLS:   any node IP :853  (NAT → NodePort 30853 TCP)
+#                   cert in pod; server name dns.adguard.sigaint.au
+#   Dashboard:      https://adguard.sigaint.au/  (port 3000 via Ingress)
+#   DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
+#
+# Host firewall (firewalld) — apply on EVERY node:
 #
 #   sudo firewall-cmd --permanent --add-masquerade
 #
-#   # Public ports clients use
-#   sudo firewall-cmd --permanent --add-forward-port=port=53:proto=udp:toport=30053
-#   sudo firewall-cmd --permanent --add-forward-port=port=53:proto=tcp:toport=30053
-#   sudo firewall-cmd --permanent --add-forward-port=port=853:proto=tcp:toport=30853
+#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" forward-port port="53" protocol="udp" to-port="30053"'
+#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" forward-port port="53" protocol="tcp" to-port="30053"'
+#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" forward-port port="853" protocol="tcp" to-port="30853"'
 #
-#   # Allow only DNATed hits on the NodePorts (not direct :30053 / :30853)
-#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 \
-#     -p udp --dport 30053 -m conntrack --ctstate DNAT -j ACCEPT
-#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 \
-#     -p tcp --dport 30053 -m conntrack --ctstate DNAT -j ACCEPT
-#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 \
-#     -p tcp --dport 30853 -m conntrack --ctstate DNAT -j ACCEPT
-#   sudo firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 \
-#     -p udp --dport 30053 -m conntrack --ctstate DNAT -j ACCEPT
-#   sudo firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 \
-#     -p tcp --dport 30053 -m conntrack --ctstate DNAT -j ACCEPT
-#   sudo firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 \
-#     -p tcp --dport 30853 -m conntrack --ctstate DNAT -j ACCEPT
-#
-#   # Reject direct NodePort access (optional if the zone already defaults to drop)
-#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 1 \
-#     -p udp --dport 30053 -j REJECT
-#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 1 \
-#     -p tcp --dport 30053 -j REJECT
-#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 1 \
-#     -p tcp --dport 30853 -j REJECT
+#   # Optional IPv6
+#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv6" forward-port port="53" protocol="udp" to-port="30053"'
+#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv6" forward-port port="53" protocol="tcp" to-port="30053"'
+#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv6" forward-port port="853" protocol="tcp" to-port="30853"'
 #
 #   sudo firewall-cmd --reload
 #
-# Clients use node IP (or VIP) on standard ports 53 / 853 only.
+# Verify (replace NODE with each node IP):
+#   kubectl -n adguard get deploy,pods,svc,ep
+#   dig @NODE -p 53 example.com +time=2
+#   # NodePort may not show in ss (iptables/eBPF); empty ss is OK.
+#
+# If DNATed traffic is dropped (some firewalld backends), fall back to direct
+# rules that ACCEPT only -m conntrack --ctstate DNAT on 30053/30853.
 defaultNamespace: adguard
 labels:
   component: adguard
