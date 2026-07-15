@@ -1,7 +1,9 @@
-# AdGuard Home — network-wide DNS ad blocker.
+# AdGuard Home — network-wide DNS ad blocker (rancher-syd-prod only).
 #
-# DNS is bound on host port 53 via hostNetwork (NodePort Service also exposes 53).
-# Web UI is exposed at https://adguard.sigaint.au/ (Traefik + cert-manager).
+# DNS plain:      hostNetwork :53 (NodePort Service also exposes 53)
+# Dashboard:      https://adguard.sigaint.au/  (port 3000)
+# DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
+# DNS-over-TLS:   dns.adguard.sigaint.au:853  (cert mounted from cert-manager)
 defaultNamespace: adguard
 labels:
   component: adguard

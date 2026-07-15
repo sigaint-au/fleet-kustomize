@@ -12,6 +12,7 @@ labels:
 resources:
   - namespace.yaml
   - pvc.yaml
+  - certificate.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml

@@ -17,11 +17,13 @@ spec:
       port: 53
       targetPort: 53
       protocol: UDP
-    - name: http-setup
+    # Dashboard / setup UI (also unencrypted DoH backend when allow_unencrypted_doh is on).
+    - name: http
       port: 3000
       targetPort: 3000
       protocol: TCP
-    - name: http
-      port: 80
-      targetPort: 80
+    # DNS-over-TLS (hostNetwork binds node :853).
+    - name: dot
+      port: 853
+      targetPort: 853
       protocol: TCP

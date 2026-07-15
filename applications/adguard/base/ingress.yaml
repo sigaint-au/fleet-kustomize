@@ -1,3 +1,4 @@
+# Dashboard UI
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -18,8 +19,28 @@ spec:
             backend:
               service:
                 name: adguard
-                # First-run wizard listens on 3000. After setup, if AdGuard moves
-                # the UI to :80, change this port (or keep the UI on 3000 behind
-                # the reverse proxy — recommended).
+                port:
+                  number: 3000
+---
+# DNS-over-HTTPS — clients: https://dns.adguard.sigaint.au/dns-query
+# TLS terminates at Traefik; AdGuard serves plain DoH when allow_unencrypted_doh is enabled.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adguard-doh
+spec:
+  tls:
+    - hosts:
+        - dns.adguard.sigaint.au
+      secretName: adguard-dns-tls
+  rules:
+    - host: dns.adguard.sigaint.au
+      http:
+        paths:
+          - path: /dns-query
+            pathType: Prefix
+            backend:
+              service:
+                name: adguard
                 port:
                   number: 3000

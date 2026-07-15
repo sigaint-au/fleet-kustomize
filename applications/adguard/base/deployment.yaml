@@ -4,7 +4,7 @@ metadata:
   name: adguard
 spec:
   replicas: 1
-  # hostNetwork binds :53 on the node; RWO PVC cannot be multi-attached.
+  # hostNetwork binds privileged ports on the node; RWO PVC cannot be multi-attached.
   strategy:
     type: Recreate
   selector:
@@ -30,9 +30,13 @@ spec:
             - name: dns-udp
               containerPort: 53
               protocol: UDP
-            # Initial setup wizard (and web UI if left on 3000).
-            - name: http-setup
+            # Dashboard + unencrypted DoH backend (Traefik terminates TLS for DoH).
+            - name: http
               containerPort: 3000
+              protocol: TCP
+            # DNS-over-TLS (requires encryption enabled + cert paths below).
+            - name: dot
+              containerPort: 853
               protocol: TCP
           securityContext:
             capabilities:
@@ -45,6 +49,17 @@ spec:
             - name: data
               mountPath: /opt/adguardhome/conf
               subPath: conf
+            # cert-manager Secret (dns.adguard.sigaint.au) for DoT in AdGuard.
+            # In Encryption settings use:
+            #   certificate: /opt/adguardhome/certs/tls.crt
+            #   private key: /opt/adguardhome/certs/tls.key
+            #   server name: dns.adguard.sigaint.au
+            #   DoT port: 853
+            #   enable "Allow unencrypted DoH" (Traefik fronts DoH)
+            # Do not bind AdGuard HTTPS on 443 — Traefik already owns host :443.
+            - name: tls
+              mountPath: /opt/adguardhome/certs
+              readOnly: true
           resources:
             requests:
               cpu: 50m
@@ -67,3 +82,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: adguard-data
+        - name: tls
+          secret:
+            secretName: adguard-dns-tls
