@@ -1,0 +1,13 @@
+# TLS certificate for DNS-over-HTTPS (Ingress) and DNS-over-TLS (AdGuard :853).
+# The same Secret is mounted into the AdGuard pod for DoT.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: adguard-dns-tls
+spec:
+  secretName: adguard-dns-tls
+  issuerRef:
+    name: le-production
+    kind: ClusterIssuer
+  dnsNames:
+    - dns.adguard.sigaint.au
