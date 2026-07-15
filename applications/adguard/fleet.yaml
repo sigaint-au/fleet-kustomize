@@ -1,9 +1,48 @@
 # AdGuard Home — network-wide DNS ad blocker (rancher-syd-prod only).
+# Deployment + RWO PVC; DNS/DoT via NodePort (no hostNetwork).
 #
-# DNS plain:      hostNetwork :53 (NodePort Service also exposes 53)
+# DNS plain:      NodePort 30053 (TCP/UDP) — NAT host :53 → :30053
 # Dashboard:      https://adguard.sigaint.au/  (port 3000)
 # DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
-# DNS-over-TLS:   dns.adguard.sigaint.au:853  (cert mounted from cert-manager)
+# DNS-over-TLS:   NodePort 30853 — NAT host :853 → :30853
+#                 (cert mounted from cert-manager; server name dns.adguard.sigaint.au)
+#
+# Host firewall (firewalld) — run on every node that should accept client DNS/DoT.
+# Do NOT --add-port the NodePorts (30053/30853); that publishes them to the zone.
+# Accept only traffic that arrived on :53/:853 and was DNATed to the NodePort.
+#
+#   sudo firewall-cmd --permanent --add-masquerade
+#
+#   # Public ports clients use
+#   sudo firewall-cmd --permanent --add-forward-port=port=53:proto=udp:toport=30053
+#   sudo firewall-cmd --permanent --add-forward-port=port=53:proto=tcp:toport=30053
+#   sudo firewall-cmd --permanent --add-forward-port=port=853:proto=tcp:toport=30853
+#
+#   # Allow only DNATed hits on the NodePorts (not direct :30053 / :30853)
+#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 \
+#     -p udp --dport 30053 -m conntrack --ctstate DNAT -j ACCEPT
+#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 \
+#     -p tcp --dport 30053 -m conntrack --ctstate DNAT -j ACCEPT
+#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 \
+#     -p tcp --dport 30853 -m conntrack --ctstate DNAT -j ACCEPT
+#   sudo firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 \
+#     -p udp --dport 30053 -m conntrack --ctstate DNAT -j ACCEPT
+#   sudo firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 \
+#     -p tcp --dport 30053 -m conntrack --ctstate DNAT -j ACCEPT
+#   sudo firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 \
+#     -p tcp --dport 30853 -m conntrack --ctstate DNAT -j ACCEPT
+#
+#   # Reject direct NodePort access (optional if the zone already defaults to drop)
+#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 1 \
+#     -p udp --dport 30053 -j REJECT
+#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 1 \
+#     -p tcp --dport 30053 -j REJECT
+#   sudo firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 1 \
+#     -p tcp --dport 30853 -j REJECT
+#
+#   sudo firewall-cmd --reload
+#
+# Clients use node IP (or VIP) on standard ports 53 / 853 only.
 defaultNamespace: adguard
 labels:
   component: adguard

@@ -4,7 +4,7 @@ metadata:
   name: adguard
 spec:
   replicas: 1
-  # hostNetwork binds privileged ports on the node; RWO PVC cannot be multi-attached.
+  # RWO PVC cannot be multi-attached across nodes.
   strategy:
     type: Recreate
   selector:
@@ -15,8 +15,6 @@ spec:
       labels:
         app.kubernetes.io/name: adguard
     spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: adguardhome
           image: adguard/adguardhome:v0.107.78
@@ -41,7 +39,7 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-            # DNS-over-TLS (requires encryption enabled + cert paths below).
+            # DNS-over-TLS (NodePort 30853; host :853 via firewall-cmd NAT).
             - name: dot
               containerPort: 853
               protocol: TCP

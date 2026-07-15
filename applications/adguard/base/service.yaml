@@ -7,23 +7,27 @@ spec:
   selector:
     app.kubernetes.io/name: adguard
   ports:
-    # DNS on port 53. With hostNetwork the pod also binds node :53 directly.
-    # NodePort values fall in the cluster NodePort range (not privileged 53).
+    # DNS — NodePort 30053. Host NAT :53 → :30053; do not firewall-open 30053
+    # (accept ctstate DNAT only — see fleet.yaml).
     - name: dns-tcp
       port: 53
       targetPort: 53
+      nodePort: 30053
       protocol: TCP
     - name: dns-udp
       port: 53
       targetPort: 53
+      nodePort: 30053
       protocol: UDP
     # Dashboard / setup UI (also unencrypted DoH backend when allow_unencrypted_doh is on).
+    # Prefer Ingress https://adguard.sigaint.au/ over the NodePort.
     - name: http
       port: 3000
       targetPort: 3000
       protocol: TCP
-    # DNS-over-TLS (hostNetwork binds node :853).
+    # DNS-over-TLS — NodePort 30853. Host NAT :853 → :30853; same DNAT-only accept.
     - name: dot
       port: 853
       targetPort: 853
+      nodePort: 30853
       protocol: TCP
