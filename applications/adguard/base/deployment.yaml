@@ -52,7 +52,7 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-            # DNS-over-TLS (host :853 on the pod's node; NodePort 30853 elsewhere).
+            # DNS-over-TLS (hostNetwork + Service nodePort 853).
             - name: dot
               containerPort: 853
               protocol: TCP

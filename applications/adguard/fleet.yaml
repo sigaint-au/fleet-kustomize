@@ -3,42 +3,32 @@
 # Architecture (hostNetwork + NodePort + shared RWX):
 #   - Deployment replicas: 3, hostNetwork: true, pod anti-affinity (1 per node)
 #   - Each pod binds host :53 / :853 / :3000 on its node
-#   - NodePort Service (30053 / 30853, externalTrafficPolicy: Cluster)
+#   - NodePort Service (nodePort 53 / 853, externalTrafficPolicy: Cluster)
 #   - RWX PVC (longhorn) for shared conf/work
+#
+# Cluster prerequisite: service-node-port-range must include 53-853
+# (RKE2/kube-apiserver default is 30000-32767 — widen it or this Service will fail).
 #
 # Do not: schedule two hostNetwork pods on one node, or externalTrafficPolicy: Local.
 # Note: multiple AdGuard processes sharing conf is best-effort (avoid concurrent UI edits).
 #
 # Endpoints:
-#   DNS plain:      pod's node IP :53   (direct hostNetwork)
-#                   other nodes     :30053 (NodePort) or DNAT :53 → :30053
-#   DNS-over-TLS:   pod's node IP :853
-#                   other nodes     :30853 (NodePort)
+#   DNS plain:      any node IP :53
+#   DNS-over-TLS:   any node IP :853
 #                   cert in pod; server name dns.adguard.sigaint.au
 #   Dashboard:      https://adguard.sigaint.au/  (port 3000 via Ingress)
 #   DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
 #
-# Host firewall — on the node running the pod, open real DNS/DoT ports:
+# Host firewall — on every node that should accept client DNS/DoT:
 #
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/udp
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/tcp
 #   sudo firewall-cmd --permanent --zone=public --add-port=853/tcp
 #   sudo firewall-cmd --reload
 #
-# Optional: on EVERY node, DNAT standard ports → NodePort so any node IP :53 works
-# (pod node already serves :53 directly; DNAT there is unnecessary if AdGuard owns :53):
-#
-#   NODE_IP=$(hostname -I | awk '{print $1}')
-#   sudo firewall-cmd --permanent --zone=public --add-masquerade
-#   sudo firewall-cmd --permanent --zone=public --add-rich-rule="rule family=\"ipv4\" forward-port port=\"53\" protocol=\"udp\" to-port=\"30053\" to-addr=\"${NODE_IP}\""
-#   sudo firewall-cmd --permanent --zone=public --add-rich-rule="rule family=\"ipv4\" forward-port port=\"53\" protocol=\"tcp\" to-port=\"30053\" to-addr=\"${NODE_IP}\""
-#   sudo firewall-cmd --permanent --zone=public --add-rich-rule="rule family=\"ipv4\" forward-port port=\"853\" protocol=\"tcp\" to-port=\"30853\" to-addr=\"${NODE_IP}\""
-#   sudo firewall-cmd --reload
-#
 # Verify:
 #   kubectl -n adguard get deploy,pods,svc,ep -o wide
-#   dig @<pod-node-ip> -p 53 example.com +time=2
-#   dig @<other-node-ip> -p 30053 example.com +time=2
+#   dig @<any-node-ip> -p 53 example.com +time=2
 defaultNamespace: adguard
 labels:
   component: adguard
