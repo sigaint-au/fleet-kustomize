@@ -1,43 +1,44 @@
 # AdGuard Home — network-wide DNS ad blocker (rancher-syd-prod only).
 #
-# Architecture (one instance, all nodes accept DNS):
-#   Client → any node :53 / :853
-#         → firewalld DNAT → NodePort 30053 / 30853
-#         → kube-proxy (externalTrafficPolicy: Cluster)
-#         → single AdGuard Deployment pod (+ RWO PVC)
+# Architecture (hostNetwork + NodePort + shared RWX):
+#   - Deployment replicas: 3, hostNetwork: true, pod anti-affinity (1 per node)
+#   - Each pod binds host :53 / :853 / :3000 on its node
+#   - NodePort Service (30053 / 30853, externalTrafficPolicy: Cluster)
+#   - RWX PVC (longhorn) for shared conf/work
 #
-# Do not: DaemonSet AdGuard, hostNetwork, externalTrafficPolicy: Local,
-#         or --add-port for 30053/30853 on the host firewall.
+# Do not: schedule two hostNetwork pods on one node, or externalTrafficPolicy: Local.
+# Note: multiple AdGuard processes sharing conf is best-effort (avoid concurrent UI edits).
 #
 # Endpoints:
-#   DNS plain:      any node IP :53   (NAT → NodePort 30053 TCP/UDP)
-#   DNS-over-TLS:   any node IP :853  (NAT → NodePort 30853 TCP)
+#   DNS plain:      pod's node IP :53   (direct hostNetwork)
+#                   other nodes     :30053 (NodePort) or DNAT :53 → :30053
+#   DNS-over-TLS:   pod's node IP :853
+#                   other nodes     :30853 (NodePort)
 #                   cert in pod; server name dns.adguard.sigaint.au
 #   Dashboard:      https://adguard.sigaint.au/  (port 3000 via Ingress)
 #   DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
 #
-# Host firewall (firewalld) — apply on EVERY node:
+# Host firewall — on the node running the pod, open real DNS/DoT ports:
 #
-#   sudo firewall-cmd --permanent --add-masquerade
-#
-#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" forward-port port="53" protocol="udp" to-port="30053"'
-#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" forward-port port="53" protocol="tcp" to-port="30053"'
-#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv4" forward-port port="853" protocol="tcp" to-port="30853"'
-#
-#   # Optional IPv6
-#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv6" forward-port port="53" protocol="udp" to-port="30053"'
-#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv6" forward-port port="53" protocol="tcp" to-port="30053"'
-#   sudo firewall-cmd --permanent --add-rich-rule='rule family="ipv6" forward-port port="853" protocol="tcp" to-port="30853"'
-#
+#   sudo firewall-cmd --permanent --zone=public --add-port=53/udp
+#   sudo firewall-cmd --permanent --zone=public --add-port=53/tcp
+#   sudo firewall-cmd --permanent --zone=public --add-port=853/tcp
 #   sudo firewall-cmd --reload
 #
-# Verify (replace NODE with each node IP):
-#   kubectl -n adguard get deploy,pods,svc,ep
-#   dig @NODE -p 53 example.com +time=2
-#   # NodePort may not show in ss (iptables/eBPF); empty ss is OK.
+# Optional: on EVERY node, DNAT standard ports → NodePort so any node IP :53 works
+# (pod node already serves :53 directly; DNAT there is unnecessary if AdGuard owns :53):
 #
-# If DNATed traffic is dropped (some firewalld backends), fall back to direct
-# rules that ACCEPT only -m conntrack --ctstate DNAT on 30053/30853.
+#   NODE_IP=$(hostname -I | awk '{print $1}')
+#   sudo firewall-cmd --permanent --zone=public --add-masquerade
+#   sudo firewall-cmd --permanent --zone=public --add-rich-rule="rule family=\"ipv4\" forward-port port=\"53\" protocol=\"udp\" to-port=\"30053\" to-addr=\"${NODE_IP}\""
+#   sudo firewall-cmd --permanent --zone=public --add-rich-rule="rule family=\"ipv4\" forward-port port=\"53\" protocol=\"tcp\" to-port=\"30053\" to-addr=\"${NODE_IP}\""
+#   sudo firewall-cmd --permanent --zone=public --add-rich-rule="rule family=\"ipv4\" forward-port port=\"853\" protocol=\"tcp\" to-port=\"30853\" to-addr=\"${NODE_IP}\""
+#   sudo firewall-cmd --reload
+#
+# Verify:
+#   kubectl -n adguard get deploy,pods,svc,ep -o wide
+#   dig @<pod-node-ip> -p 53 example.com +time=2
+#   dig @<other-node-ip> -p 30053 example.com +time=2
 defaultNamespace: adguard
 labels:
   component: adguard

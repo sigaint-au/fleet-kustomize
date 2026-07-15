@@ -3,12 +3,14 @@ kind: Deployment
 metadata:
   name: adguard
 spec:
-  # One instance cluster-wide. All nodes still accept DNS via NodePort+NAT
-  # (Service externalTrafficPolicy: Cluster); do not scale or use a DaemonSet.
-  replicas: 1
-  # RWO PVC cannot be multi-attached across nodes.
+  # hostNetwork binds :53/:853 on each pod's node; anti-affinity keeps one per node.
+  # Shared RWX PVC for conf/work. Other nodes without a pod use NodePort.
+  replicas: 3
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: adguard
@@ -17,7 +19,15 @@ spec:
       labels:
         app.kubernetes.io/name: adguard
     spec:
-      # Pod network only — host :53/:853 come from firewalld → NodePort on every node.
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: adguard
+              topologyKey: kubernetes.io/hostname
       containers:
         - name: adguardhome
           image: adguard/adguardhome:v0.107.78
@@ -42,7 +52,7 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-            # DNS-over-TLS (Service NodePort 30853; host :853 via firewalld).
+            # DNS-over-TLS (host :853 on the pod's node; NodePort 30853 elsewhere).
             - name: dot
               containerPort: 853
               protocol: TCP
