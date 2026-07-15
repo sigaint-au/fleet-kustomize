@@ -57,9 +57,9 @@ spec:
             #   DoT port: 853
             #   enable "Allow unencrypted DoH" (Traefik fronts DoH)
             # Do not bind AdGuard HTTPS on 443 — Traefik already owns host :443.
-#            - name: tls
-#              mountPath: /opt/adguardhome/certs
-#              readOnly: true
+            - name: tls
+              mountPath: /opt/adguardhome/certs
+              readOnly: true
           resources:
             requests:
               cpu: 50m
@@ -82,6 +82,6 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: adguard-data
-#        - name: tls
-#          secret:
-#            secretName: adguard-dns-tls
+        - name: tls
+          secret:
+            secretName: adguard-dns-tls
