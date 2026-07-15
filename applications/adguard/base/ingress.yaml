@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adguard
+  annotations:
+    cert-manager.io/cluster-issuer: le-production
+spec:
+  tls:
+    - hosts:
+        - adguard.sigaint.au
+      secretName: adguard-sigaint-au-tls
+  rules:
+    - host: adguard.sigaint.au
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: adguard
+                # First-run wizard listens on 3000. After setup, if AdGuard moves
+                # the UI to :80, change this port (or keep the UI on 3000 behind
+                # the reverse proxy — recommended).
+                port:
+                  number: 3000

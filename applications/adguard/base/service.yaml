@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: adguard
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: adguard
+  ports:
+    # DNS on port 53. With hostNetwork the pod also binds node :53 directly.
+    # NodePort values fall in the cluster NodePort range (not privileged 53).
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
+    - name: http-setup
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
