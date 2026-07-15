@@ -2,7 +2,7 @@
 #
 # Architecture:
 #   - Deployment replicas: 1, pod network (no hostNetwork), ClusterIP Service
-#   - Plain DNS UDP: Traefik DaemonSet hostNetwork :53 → UDPRoute → Service :53
+#   - Plain DNS UDP: Traefik DaemonSet hostPort :53 → entrypoint 5353 → UDPRoute → Service :53
 #   - Dashboard / DoH: Ingress (Traefik HTTP/HTTPS)
 #   - PVC for conf/work
 #
