@@ -1,31 +1,31 @@
 # AdGuard Home — network-wide DNS ad blocker (rancher-syd-prod only).
 #
-# Architecture (hostNetwork :53/:853 + ClusterIP Service + shared RWX):
-#   - Deployment replicas: 3, hostNetwork: true, pod anti-affinity (1 per node)
-#   - AdGuard binds host :53 (DNS) and :853 (DoT) on each pod's node
-#   - ClusterIP Service ports 53/853/3000 for Ingress and in-cluster access
-#   - RWX PVC (longhorn) for shared conf/work
-#
-# External clients: dig @<pod-node-ip> (port 53). Point DHCP at node IPs that
-# run AdGuard pods. (NodePort 53/853 is rejected by default apiserver range.)
+# Architecture:
+#   - Deployment replicas: 1, pod network (no hostNetwork), ClusterIP Service
+#   - Plain DNS UDP: Traefik DaemonSet hostNetwork :53 → UDPRoute → Service :53
+#   - Dashboard / DoH: Ingress (Traefik HTTP/HTTPS)
+#   - PVC for conf/work
 #
 # Endpoints:
-#   DNS plain:      each pod node IP :53
-#   DNS-over-TLS:   each pod node IP :853  (server name dns.adguard.sigaint.au)
-#   Dashboard:      https://adguard.sigaint.au/  (port 3000 via Ingress)
+#   DNS plain:      any Traefik node IP :53 (UDP) → AdGuard
+#   DNS-over-TLS:   (pod :853; not fronted by Traefik yet)
+#   Dashboard:      https://adguard.sigaint.au/
 #   DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
 #
-# Host firewall — on every node that runs an AdGuard pod:
+# Host firewall — on every Traefik (ingress) node:
 #
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/udp
-#   sudo firewall-cmd --permanent --zone=public --add-port=53/tcp
-#   sudo firewall-cmd --permanent --zone=public --add-port=853/tcp
 #   sudo firewall-cmd --reload
 #
+# Prerequisites:
+#   - Gateway API experimental CRDs (UDPRoute v1alpha2)
+#   - Traefik providers.kubernetesGateway.experimentalChannel: true
+#   - Traefik gateway listener "dns" port 53 UDP (see traefik values)
+#
 # Verify:
-#   kubectl -n adguard get deploy,pods,svc -o wide
-#   dig @<pod-node-ip> -p 53 example.com +time=2
-#   ss -ulnp | grep ':53'   # on a pod node — should show AdGuard
+#   kubectl -n adguard get deploy,svc,udproute
+#   kubectl -n traefik get gateway traefik-gateway -o yaml
+#   dig @<traefik-node-ip> -p 53 example.com +time=2
 defaultNamespace: adguard
 labels:
   component: adguard
@@ -37,6 +37,10 @@ targetCustomizations:
         sigaint.au/cluster-id: rancher-syd-prod
     kustomize:
       dir: base
+    dependsOn:
+      - selector:
+          matchLabels:
+            component: traefik-install
 
   # Sydney only; LHM and other clusters are excluded.
   - name: exclude-others

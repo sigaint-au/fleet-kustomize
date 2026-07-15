@@ -3,8 +3,6 @@ kind: Service
 metadata:
   name: adguard
 spec:
-  # ClusterIP for in-cluster / Ingress backends. External DNS/DoT is hostNetwork
-  # :53/:853 on each pod node (NodePort 53/853 is not allowed by apiserver range).
   type: ClusterIP
   selector:
     app.kubernetes.io/name: adguard

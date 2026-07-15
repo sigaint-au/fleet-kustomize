@@ -3,14 +3,10 @@ kind: Deployment
 metadata:
   name: adguard
 spec:
-  # hostNetwork binds real host :53/:853 on each pod's node; anti-affinity = 1 per node.
-  # Shared RWX PVC for conf/work.
-  replicas: 3
+  # ClusterIP only; Traefik hostNetwork :53 UDPRoute fronts plain DNS.
+  replicas: 1
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1
-      maxSurge: 0
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: adguard
@@ -19,15 +15,6 @@ spec:
       labels:
         app.kubernetes.io/name: adguard
     spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: adguard
-              topologyKey: kubernetes.io/hostname
       containers:
         - name: adguardhome
           image: adguard/adguardhome:v0.107.78
@@ -52,7 +39,7 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-            # DNS-over-TLS (hostNetwork :853).
+            # DNS-over-TLS (cert mounted; expose via future TCPRoute or host if needed).
             - name: dot
               containerPort: 853
               protocol: TCP

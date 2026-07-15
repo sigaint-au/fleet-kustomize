@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: adguard-data
 spec:
-  # Shared conf/work across replicas (hostNetwork, one pod per node).
+  # conf/work for the single hostNetwork instance.
   accessModes:
     - ReadWriteMany
   storageClassName: longhorn
