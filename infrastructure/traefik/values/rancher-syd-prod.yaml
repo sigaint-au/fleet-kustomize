@@ -10,13 +10,6 @@ deployment:
 #nodeSelector:
 #  kubernetes.io/hostname: rancher-1894.syd.prod.sigaint.au
 
-# Tolerate the custom taint
-tolerations:
-  - key: "ingress"
-    operator: "equal"
-    value: "true"
-    effect: "NoSchedule"
-
 # hostNetwork is top-level in the chart (not only under deployment).
 hostNetwork: true
 
