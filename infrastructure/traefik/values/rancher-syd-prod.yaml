@@ -3,23 +3,14 @@
 # DaemonSet with hostPort (not hostNetwork): process binds unprivileged
 # container ports; kubelet maps host 80/443/53 → those ports. Avoids
 # "bind: permission denied" as non-root on privileged ports.
+#
+# DNS UDP uses Traefik CRD IngressRouteUDP (Gateway API does not support
+# UDP listeners — experimentalChannel only adds TCPRoute/TLSRoute).
 
 deployment:
   enabled: true
   kind: DaemonSet
 
-## Target the specific node
-#nodeSelector:
-#  kubernetes.io/hostname: rancher-1894.syd.prod.sigaint.au
-
-# Tolerate the custom taint
-tolerations:
-  - key: "ingress"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"
-
-# Do not use hostNetwork — chart non-root user cannot bind :80/:443/:53.
 hostNetwork: false
 
 ports:
@@ -35,8 +26,7 @@ ports:
     expose:
       default: true
     exposedPort: 443
-  # Plain DNS (UDP). Container listens on 5353; host :53 is mapped via hostPort.
-  # Gateway listener port must match this container port (not hostPort).
+  # Plain DNS (UDP). Container 5353; host :53 via hostPort.
   dns:
     port: 5353
     hostPort: 53
@@ -50,22 +40,19 @@ service:
   enabled: false
 
 providers:
+  kubernetesCRD:
+    enabled: true
   kubernetesGateway:
     enabled: true
-    # Required for UDPRoute / TCPRoute (experimental Gateway API channel).
+    # TCPRoute/TLSRoute only — not UDP.
     experimentalChannel: true
 
-# Default Gateway (traefik-gateway). Listener ports = ports.*.port (container).
+# HTTP Gateway only (no UDP listeners — unsupported by kubernetesgateway).
 gateway:
   enabled: true
   listeners:
     web:
       port: 8000
       protocol: HTTP
-      namespacePolicy:
-        from: All
-    dns:
-      port: 5353
-      protocol: UDP
       namespacePolicy:
         from: All

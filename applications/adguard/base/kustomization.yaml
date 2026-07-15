@@ -16,4 +16,4 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
-  - udproute.yaml
+  - ingressroute-udp.yaml

@@ -2,7 +2,8 @@
 #
 # Architecture:
 #   - Deployment replicas: 1, pod network (no hostNetwork), ClusterIP Service
-#   - Plain DNS UDP: Traefik DaemonSet hostPort :53 → entrypoint 5353 → UDPRoute → Service :53
+#   - Plain DNS UDP: Traefik DaemonSet hostPort :53 → entrypoint dns (5353)
+#                    → IngressRouteUDP → Service adguard:53
 #   - Dashboard / DoH: Ingress (Traefik HTTP/HTTPS)
 #   - PVC for conf/work
 #
@@ -17,14 +18,11 @@
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/udp
 #   sudo firewall-cmd --reload
 #
-# Prerequisites:
-#   - Gateway API experimental CRDs (UDPRoute v1alpha2)
-#   - Traefik providers.kubernetesGateway.experimentalChannel: true
-#   - Traefik gateway listener "dns" port 53 UDP (see traefik values)
+# Note: Gateway API UDPRoute is not supported by Traefik (Unsupported listener
+# protocol "UDP"). Use traefik.io IngressRouteUDP instead.
 #
 # Verify:
-#   kubectl -n adguard get deploy,svc,udproute
-#   kubectl -n traefik get gateway traefik-gateway -o yaml
+#   kubectl -n adguard get deploy,svc,ingressrouteudp
 #   dig @<traefik-node-ip> -p 53 example.com +time=2
 defaultNamespace: adguard
 labels:

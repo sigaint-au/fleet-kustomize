@@ -1,0 +1,14 @@
+# Plain DNS (UDP) via Traefik IngressRouteUDP (not Gateway API UDPRoute —
+# Traefik rejects Gateway listeners with protocol UDP).
+# Entrypoint "dns" = host :53 → container :5353 (see traefik values).
+apiVersion: traefik.io/v1alpha1
+kind: IngressRouteUDP
+metadata:
+  name: adguard-dns
+spec:
+  entryPoints:
+    - dns
+  routes:
+    - services:
+        - name: adguard
+          port: 53
