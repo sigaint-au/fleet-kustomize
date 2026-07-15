@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: adguard
 spec:
-  # ClusterIP only; Traefik hostNetwork :53 UDPRoute fronts plain DNS.
+  # Pod network; Service NodePort + Traefik IngressRouteUDP front plain DNS.
   replicas: 1
   strategy:
     type: Recreate

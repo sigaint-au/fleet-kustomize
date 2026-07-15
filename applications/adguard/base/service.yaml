@@ -3,17 +3,22 @@ kind: Service
 metadata:
   name: adguard
 spec:
-  type: ClusterIP
+  type: NodePort
+  # Cluster so Traefik (and any node) can reach the pod regardless of schedule.
+  externalTrafficPolicy: Cluster
   selector:
     app.kubernetes.io/name: adguard
   ports:
+    # Service port 53 → pod :53. nodePort must be in 30000-32767 (apiserver range).
     - name: dns-tcp
       port: 53
       targetPort: 53
+      nodePort: 30053
       protocol: TCP
     - name: dns-udp
       port: 53
       targetPort: 53
+      nodePort: 30053
       protocol: UDP
     # Dashboard / unencrypted DoH backend (Traefik terminates TLS for DoH).
     - name: http
@@ -23,4 +28,5 @@ spec:
     - name: dot
       port: 853
       targetPort: 853
+      nodePort: 30853
       protocol: TCP

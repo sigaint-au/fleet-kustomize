@@ -1,29 +1,37 @@
 # AdGuard Home — network-wide DNS ad blocker (rancher-syd-prod only).
 #
 # Architecture:
-#   - Deployment replicas: 1, pod network (no hostNetwork), ClusterIP Service
-#   - Plain DNS UDP: Traefik DaemonSet hostPort :53 → entrypoint dns (5353)
-#                    → IngressRouteUDP → Service adguard:53
+#   - Deployment replicas: 1, pod network (no hostNetwork)
+#   - Service NodePort: DNS 30053, DoT 30853 (service ports 53/853)
+#   - Plain DNS UDP: Traefik hostPort :53 → entrypoint dns → IngressRouteUDP
+#                    → Service adguard:53 → pod
 #   - Dashboard / DoH: Ingress (Traefik HTTP/HTTPS)
 #   - PVC for conf/work
 #
 # Endpoints:
-#   DNS plain:      any Traefik node IP :53 (UDP) → AdGuard
-#   DNS-over-TLS:   (pod :853; not fronted by Traefik yet)
+#   DNS plain:      Traefik node :53 (UDP) or any node :30053 (NodePort)
+#   DNS-over-TLS:   any node :30853 (NodePort)
 #   Dashboard:      https://adguard.sigaint.au/
 #   DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
 #
-# Host firewall — on every Traefik (ingress) node:
-#
+# Host firewall — Traefik nodes (UDP DNS via Traefik):
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/udp
+# Optional NodePort access:
+#   sudo firewall-cmd --permanent --zone=public --add-port=30053/udp
+#   sudo firewall-cmd --permanent --zone=public --add-port=30053/tcp
+#   sudo firewall-cmd --permanent --zone=public --add-port=30853/tcp
 #   sudo firewall-cmd --reload
 #
-# Note: Gateway API UDPRoute is not supported by Traefik (Unsupported listener
-# protocol "UDP"). Use traefik.io IngressRouteUDP instead.
+# Note: Gateway API UDPRoute is not supported by Traefik. Use IngressRouteUDP.
+#
+# If Traefik logs "connection refused" to pod:53, AdGuard is not listening yet
+# (finish setup wizard / check dig @<pod-ip> -p 53 from a debug pod).
 #
 # Verify:
-#   kubectl -n adguard get deploy,svc,ingressrouteudp
+#   kubectl -n adguard get deploy,svc,endpoints,ingressrouteudp
+#   dig @<node-ip> -p 30053 example.com +time=2
 #   dig @<traefik-node-ip> -p 53 example.com +time=2
+
 defaultNamespace: adguard
 labels:
   component: adguard
