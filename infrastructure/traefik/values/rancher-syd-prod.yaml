@@ -20,6 +20,13 @@ tolerations:
 # hostNetwork is top-level in the chart (not only under deployment).
 hostNetwork: true
 
+# Chart requires maxUnavailable > 0 with hostNetwork (default is 0).
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 0
+
 # Bind privileged host ports 80/443/53 as non-root.
 securityContext:
   allowPrivilegeEscalation: false

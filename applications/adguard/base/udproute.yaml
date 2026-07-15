@@ -1,0 +1,16 @@
+# Plain DNS (UDP) via Traefik Gateway API.
+# Traefik (rancher-syd-prod): hostNetwork entrypoint "dns" :53/udp → this route.
+# Requires: providers.kubernetesGateway.experimentalChannel + Gateway listener "dns".
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: UDPRoute
+metadata:
+  name: adguard-dns
+spec:
+  parentRefs:
+    - name: traefik-gateway
+      namespace: traefik
+      sectionName: dns
+  rules:
+    - backendRefs:
+        - name: adguard
+          port: 53
