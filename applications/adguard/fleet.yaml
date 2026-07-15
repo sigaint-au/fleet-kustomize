@@ -1,25 +1,21 @@
 # AdGuard Home — network-wide DNS ad blocker (rancher-syd-prod only).
 #
-# Architecture (hostNetwork + NodePort + shared RWX):
+# Architecture (hostNetwork :53/:853 + ClusterIP Service + shared RWX):
 #   - Deployment replicas: 3, hostNetwork: true, pod anti-affinity (1 per node)
-#   - Each pod binds host :53 / :853 / :3000 on its node
-#   - NodePort Service (nodePort 53 / 853, externalTrafficPolicy: Cluster)
+#   - AdGuard binds host :53 (DNS) and :853 (DoT) on each pod's node
+#   - ClusterIP Service ports 53/853/3000 for Ingress and in-cluster access
 #   - RWX PVC (longhorn) for shared conf/work
 #
-# Cluster prerequisite: service-node-port-range must include 53-853
-# (RKE2/kube-apiserver default is 30000-32767 — widen it or this Service will fail).
-#
-# Do not: schedule two hostNetwork pods on one node, or externalTrafficPolicy: Local.
-# Note: multiple AdGuard processes sharing conf is best-effort (avoid concurrent UI edits).
+# External clients: dig @<pod-node-ip> (port 53). Point DHCP at node IPs that
+# run AdGuard pods. (NodePort 53/853 is rejected by default apiserver range.)
 #
 # Endpoints:
-#   DNS plain:      any node IP :53
-#   DNS-over-TLS:   any node IP :853
-#                   cert in pod; server name dns.adguard.sigaint.au
+#   DNS plain:      each pod node IP :53
+#   DNS-over-TLS:   each pod node IP :853  (server name dns.adguard.sigaint.au)
 #   Dashboard:      https://adguard.sigaint.au/  (port 3000 via Ingress)
 #   DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
 #
-# Host firewall — on every node that should accept client DNS/DoT:
+# Host firewall — on every node that runs an AdGuard pod:
 #
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/udp
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/tcp
@@ -27,8 +23,9 @@
 #   sudo firewall-cmd --reload
 #
 # Verify:
-#   kubectl -n adguard get deploy,pods,svc,ep -o wide
-#   dig @<any-node-ip> -p 53 example.com +time=2
+#   kubectl -n adguard get deploy,pods,svc -o wide
+#   dig @<pod-node-ip> -p 53 example.com +time=2
+#   ss -ulnp | grep ':53'   # on a pod node — should show AdGuard
 defaultNamespace: adguard
 labels:
   component: adguard

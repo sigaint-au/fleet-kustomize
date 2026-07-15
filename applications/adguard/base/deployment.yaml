@@ -3,8 +3,8 @@ kind: Deployment
 metadata:
   name: adguard
 spec:
-  # hostNetwork binds :53/:853 on each pod's node; anti-affinity keeps one per node.
-  # Shared RWX PVC for conf/work. Other nodes without a pod use NodePort.
+  # hostNetwork binds real host :53/:853 on each pod's node; anti-affinity = 1 per node.
+  # Shared RWX PVC for conf/work.
   replicas: 3
   strategy:
     type: RollingUpdate
@@ -52,7 +52,7 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-            # DNS-over-TLS (hostNetwork + Service nodePort 853).
+            # DNS-over-TLS (hostNetwork :853).
             - name: dot
               containerPort: 853
               protocol: TCP
