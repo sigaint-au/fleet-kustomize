@@ -5,7 +5,7 @@ labels:
 helm:
   repo: https://traefik.github.io/charts
   chart: traefik
-  version: 39.0.6
+  version: 41.0.2
   releaseName: traefik
 
 targetCustomizations:
