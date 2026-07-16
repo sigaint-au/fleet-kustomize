@@ -32,3 +32,8 @@ targetCustomizations:
     clusterSelector: {}
     doNotDeploy: true
 
+dependsOn:
+  - selector:
+      matchLabels:
+        component: falcosidekick-config
+

@@ -32,7 +32,11 @@ targetCustomizations:
       valuesFiles:
         - values/development.yaml
 
-
   - name: exclude-others
     clusterSelector: {}
     doNotDeploy: true
+
+dependsOn:
+  - selector:
+      matchLabels:
+        component: vmcluster-config

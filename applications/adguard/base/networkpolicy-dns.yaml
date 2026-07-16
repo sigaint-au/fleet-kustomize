@@ -1,0 +1,30 @@
+# AdGuard is a public/internal DNS edge. Plain DNS and DoT must accept clients
+# beyond Traefik (NodePort 30053/30853 and Traefik hostNetwork :53).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-adguard-dns-ingress
+  labels:
+    sigaint.au/network-policy: app
+    app.kubernetes.io/name: adguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: adguard
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        # DNS clients (LAN/WAN via NodePort or host firewall).
+        # Tighten to known CIDRs when client ranges are stable.
+        - ipBlock:
+            cidr: 0.0.0.0/0
+        - ipBlock:
+            cidr: ::/0
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+        - protocol: TCP
+          port: 853

@@ -1,0 +1,69 @@
+# Falcosidekick lives in the falco namespace (dedicated). Full baseline is safe.
+# Falco agents (often hostNetwork) push events to falcosidekick; Traefik serves
+# the HTTP API and UI Ingress.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-same-namespace-ingress
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-traefik
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+---
+# Falco sensors may run hostNetwork; allow cluster-wide sources on the
+# falcosidekick listen port. Tighten to falco DaemonSet CIDRs later if needed.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-falcosidekick-ingest
+  labels:
+    sigaint.au/network-policy: app
+    app.kubernetes.io/name: falcosidekick
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: falcosidekick
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+        - ipBlock:
+            cidr: ::/0
+      ports:
+        - protocol: TCP
+          port: 2801

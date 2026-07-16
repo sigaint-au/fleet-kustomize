@@ -1,0 +1,24 @@
+# Reusable baseline NetworkPolicies for single-tenant application namespaces.
+#
+# Semantics (Kubernetes NetworkPolicy):
+#   - First policy selecting a pod with policyTypes: [Ingress] denies all
+#     ingress that is not explicitly allowed by any selecting policy.
+#   - Egress is intentionally unrestricted in this baseline so external deps
+#     (OIDC, LDAP, SMTP, registries, Longhorn NFS, DNS upstreams) keep working.
+#   - Tighten egress in a later phase once flows are known.
+#
+# Usage (from an app kustomization):
+#   components:
+#     - ../../components/network-policy-baseline   # adjust relative path
+#
+# Traefik note:
+#   - LoadBalancer / pod-network Traefik (k3s-lhm-*): namespaceSelector works.
+#   - hostNetwork Traefik (rancher-syd-prod): add an app-specific allow from
+#     node IPs (see allow-from-hostnetwork-nodes.yaml in apps that need it).
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - default-deny-ingress.yaml
+  - allow-same-namespace.yaml
+  - allow-from-traefik.yaml

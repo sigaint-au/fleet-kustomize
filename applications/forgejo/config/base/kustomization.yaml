@@ -1,2 +1,8 @@
+components:
+  # Shared default-deny ingress + same-namespace + Traefik namespace allow.
+  # Path is relative to this kustomization (config/base → applications/components).
+  - ../../../components/network-policy-baseline
+
 resources:
   - external-secret.yaml
+  - networkpolicy-http-from-nodes.yaml

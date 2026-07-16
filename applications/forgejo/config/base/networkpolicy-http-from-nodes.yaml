@@ -1,0 +1,34 @@
+# rancher-syd-prod Traefik runs hostNetwork: true. Backend connections appear
+# from node IPs, not from pods in the traefik namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-forgejo-http-from-nodes
+  labels:
+    sigaint.au/network-policy: app
+    app.kubernetes.io/name: forgejo
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: forgejo
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 51.161.136.107/32   # rancher-1894 (internal)
+        - ipBlock:
+            cidr: 139.99.149.92/32    # rancher-1894 (upstream VIP / external)
+        - ipBlock:
+            cidr: 139.99.210.89/32    # rancher-4e60
+        - ipBlock:
+            cidr: 139.99.210.170/32   # rancher-afe5
+        - ipBlock:
+            cidr: 2402:1f00:8101:15c::1/128
+        - ipBlock:
+            cidr: 2402:1f00:8101:959::1/128
+        - ipBlock:
+            cidr: 2402:1f00:8101:9aa::1/128
+      ports:
+        - protocol: TCP
+          port: 3000

@@ -1,0 +1,20 @@
+# Supporting NetworkPolicies for VictoriaMetrics cluster (k3s-lhm-* only).
+defaultNamespace: monitoring
+labels:
+  component: vmcluster-config
+
+targetCustomizations:
+  - name: k3s-lhm-clusters
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+            - k3s-lhm-devel
+    kustomize:
+      dir: base
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

@@ -9,6 +9,10 @@ labels:
       app.kubernetes.io/part-of: adguard
     includeSelectors: false
 
+components:
+  # Shared default-deny ingress + same-namespace + Traefik namespace allow.
+  - ../../components/network-policy-baseline
+
 resources:
   - namespace.yaml
   - pvc.yaml
@@ -17,3 +21,5 @@ resources:
   - service.yaml
   - ingress.yaml
   - ingressroute-udp.yaml
+  - networkpolicy-dns.yaml
+  - networkpolicy-http-from-nodes.yaml

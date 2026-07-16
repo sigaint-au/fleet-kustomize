@@ -1,0 +1,81 @@
+# VictoriaMetrics shares the monitoring namespace with Grafana (and possibly others).
+# Scope all rules to the vmcluster Helm release via app.kubernetes.io/instance.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vmcluster-default-deny-ingress
+  labels:
+    sigaint.au/network-policy: app
+    app.kubernetes.io/instance: vmcluster
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: vmcluster
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vmcluster-allow-same-release
+  labels:
+    sigaint.au/network-policy: app
+    app.kubernetes.io/instance: vmcluster
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: vmcluster
+  policyTypes:
+    - Ingress
+  ingress:
+    # vminsert / vmselect / vmstorage / vmauth talk to each other.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: vmcluster
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vmcluster-allow-from-grafana
+  labels:
+    sigaint.au/network-policy: app
+    app.kubernetes.io/instance: vmcluster
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: vmcluster
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: grafana
+      # vmselect / vmauth typical ports (chart defaults).
+      ports:
+        - protocol: TCP
+          port: 8481
+        - protocol: TCP
+          port: 8427
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vmcluster-allow-from-traefik
+  labels:
+    sigaint.au/network-policy: app
+    app.kubernetes.io/instance: vmcluster
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: vmcluster
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only needed if an Ingress/Gateway fronts VM directly; harmless otherwise.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik

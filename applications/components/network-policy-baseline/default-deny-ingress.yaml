@@ -1,0 +1,12 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  # Selects all pods in the namespace.
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  # No ingress rules → deny all inbound traffic unless another policy allows it.
