@@ -1,7 +1,6 @@
+# All resources must live under applications/forgejo/ — Fleet packages each
+# fleet.yaml directory as an isolated bundle (no ../../../components paths).
 resources:
-  # Shared default-deny ingress + same-namespace + Traefik namespace allow.
-  # Use resources: (not components:) — Fleet cannot apply kind: Component.
-  # Path is relative to this kustomization (config/base → applications/components).
-  - ../../../components/network-policy-baseline
   - external-secret.yaml
+  - networkpolicy-baseline.yaml
   - networkpolicy-http-from-nodes.yaml

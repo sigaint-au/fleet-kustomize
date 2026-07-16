@@ -9,10 +9,9 @@ labels:
       app.kubernetes.io/part-of: adguard
     includeSelectors: false
 
+# All resources must live under applications/adguard/ — Fleet packages each
+# fleet.yaml directory as an isolated bundle (no ../../components paths).
 resources:
-  # Shared default-deny ingress + same-namespace + Traefik namespace allow.
-  # Use resources: (not components:) — Fleet cannot apply kind: Component.
-  - ../../components/network-policy-baseline
   - namespace.yaml
   - pvc.yaml
   - certificate.yaml
@@ -20,5 +19,6 @@ resources:
   - service.yaml
   - ingress.yaml
   - ingressroute-udp.yaml
+  - networkpolicy-baseline.yaml
   - networkpolicy-dns.yaml
   - networkpolicy-http-from-nodes.yaml
