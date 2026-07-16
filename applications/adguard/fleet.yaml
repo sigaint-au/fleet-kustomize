@@ -3,9 +3,9 @@
 # Architecture:
 #   - Deployment replicas: 1, pod network (no hostNetwork)
 #   - Service NodePort: DNS 30053, DoT 30853 (service ports 53/853)
-#   - Plain DNS UDP: Traefik hostPort :53 → entrypoint dns → IngressRouteUDP
-#                    → Service adguard:53 → pod
-#   - Dashboard / DoH: Ingress (Traefik HTTP/HTTPS)
+#   - Plain DNS UDP: Traefik hostNetwork :53 (IPv4+IPv6) → entrypoint dns
+#                    → IngressRouteUDP → Service adguard:53 → pod
+#   - Dashboard / DoH: Ingress (Traefik HTTP/HTTPS, dual-stack on node IPs)
 #   - PVC for conf/work
 #
 # Endpoints:
