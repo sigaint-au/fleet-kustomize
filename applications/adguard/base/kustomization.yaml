@@ -9,11 +9,10 @@ labels:
       app.kubernetes.io/part-of: adguard
     includeSelectors: false
 
-components:
-  # Shared default-deny ingress + same-namespace + Traefik namespace allow.
-  - ../../components/network-policy-baseline
-
 resources:
+  # Shared default-deny ingress + same-namespace + Traefik namespace allow.
+  # Use resources: (not components:) — Fleet cannot apply kind: Component.
+  - ../../components/network-policy-baseline
   - namespace.yaml
   - pvc.yaml
   - certificate.yaml

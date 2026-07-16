@@ -1,5 +1,8 @@
 # Reusable baseline NetworkPolicies for single-tenant application namespaces.
 #
+# Plain Kustomization (not kind: Component) so Fleet/Helm can build it correctly.
+# Fleet applies rendered objects only; kind Component is not a cluster API type.
+#
 # Semantics (Kubernetes NetworkPolicy):
 #   - First policy selecting a pod with policyTypes: [Ingress] denies all
 #     ingress that is not explicitly allowed by any selecting policy.
@@ -8,15 +11,15 @@
 #   - Tighten egress in a later phase once flows are known.
 #
 # Usage (from an app kustomization):
-#   components:
+#   resources:
 #     - ../../components/network-policy-baseline   # adjust relative path
 #
 # Traefik note:
 #   - LoadBalancer / pod-network Traefik (k3s-lhm-*): namespaceSelector works.
 #   - hostNetwork Traefik (rancher-syd-prod): add an app-specific allow from
-#     node IPs (see allow-from-hostnetwork-nodes.yaml in apps that need it).
-apiVersion: kustomize.config.k8s.io/v1alpha1
-kind: Component
+#     node IPs (see networkpolicy-http-from-nodes.yaml in apps that need it).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
 resources:
   - default-deny-ingress.yaml
