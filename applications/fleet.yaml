@@ -1,0 +1,8 @@
+# applications/ is only a grouping path for child bundles (each subdir has its own
+# fleet.yaml). Without this file Fleet also creates a parent bundle that tries to
+# apply every YAML under applications/ as raw cluster objects — including
+# kustomization.yaml (kind: Kustomization / Component), which is not a CRD.
+targetCustomizations:
+  - name: exclude-all
+    clusterSelector: {}
+    doNotDeploy: true
