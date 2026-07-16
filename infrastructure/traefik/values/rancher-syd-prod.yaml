@@ -11,8 +11,9 @@
 # bind <1024).
 # hostNetwork requires containerPort == hostPort for every entrypoint.
 #
-# DNS UDP uses Traefik CRD IngressRouteUDP (Gateway API does not support
-# UDP listeners — experimentalChannel only adds TCPRoute/TLSRoute).
+# DNS UDP uses Traefik CRD IngressRouteUDP (Gateway API UDPRoute is not
+# implemented by Traefik; use IngressRouteUDP). experimentalChannel needs
+# Gateway API experimental CRDs on the cluster first — see README.
 #
 # Host firewall (IPv4 + IPv6), e.g.:
 #   sudo firewall-cmd --permanent --zone=public --add-service=http
@@ -83,11 +84,13 @@ providers:
     enabled: true
   kubernetesGateway:
     enabled: true
-    # TCPRoute/TLSRoute only — not UDP.
+    # Watches experimental Gateway API types (TCPRoute, TLSRoute, …).
+    # Install experimental CRDs before/with Traefik or logs spam
+    # "could not find … tlsroutes.gateway.networking.k8s.io". See README.
     experimentalChannel: true
 
-# HTTP Gateway only (no UDP listeners — unsupported by kubernetesgateway).
-# Listener port must match the web entrypoint container port (80).
+# HTTP Gateway (HTTPRoute). Listener port = web entrypoint (80).
+# TCP/TLS listeners can be added later with TCPRoute/TLSRoute (experimental).
 gateway:
   enabled: true
   listeners:

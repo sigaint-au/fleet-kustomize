@@ -62,10 +62,70 @@ Components are deployed selectively using Fleet `targetCustomizations` and `depe
 - The initial Doppler authentication secret must be created manually on each cluster before the first sync.
 - k3s clusters are bootstrapped with Traefik disabled and WireGuard-native flannel. See [docs/installation.md](docs/installation.md) for the exact commands used in this environment.
 
+## Gateway API CRDs (Traefik experimental channel)
+
+`rancher-syd-prod` Traefik enables the Kubernetes Gateway API provider with **`experimentalChannel: true`**. That makes Traefik list/watch experimental resources such as **TCPRoute** and **TLSRoute**.
+
+Those types are **not** part of the standard Gateway API install (and are not always present on a fresh k3s cluster). If the experimental CRDs are missing, Traefik logs errors like:
+
+```text
+failed to list *v1.TLSRoute: the server could not find the requested resource
+(get tlsroutes.gateway.networking.k8s.io)
+```
+
+### Install (one-time per cluster)
+
+Apply the **experimental** channel bundle from [kubernetes-sigs/gateway-api](https://github.com/kubernetes-sigs/gateway-api/releases). This includes standard CRDs **plus** experimental ones (TCPRoute, TLSRoute, UDPRoute, …).
+
+Prefer server-side apply for CRDs:
+
+```bash
+# Pin a release that matches your Traefik/Gateway API expectations.
+# Check https://github.com/kubernetes-sigs/gateway-api/releases and
+# https://doc.traefik.io/traefik/reference/install-configuration/providers/kubernetes/kubernetes-gateway/
+GATEWAY_API_VERSION=v1.5.1
+
+kubectl apply --server-side -f \
+  "https://github.com/kubernetes-sigs/gateway-api/releases/download/${GATEWAY_API_VERSION}/experimental-install.yaml"
+```
+
+If the cluster already has an older **standard** install, upgrading to experimental is supported; still use a pinned version and review the release notes.
+
+### Verify
+
+```bash
+kubectl get crd | grep gateway.networking.k8s.io
+
+# Experimental types required when experimentalChannel: true
+kubectl get crd tlsroutes.gateway.networking.k8s.io
+kubectl get crd tcproutes.gateway.networking.k8s.io
+```
+
+Optional: confirm Traefik no longer logs TLSRoute reflector errors:
+
+```bash
+kubectl -n traefik logs -l app.kubernetes.io/name=traefik --tail=50 | grep -i tlsroute || true
+```
+
+### When to run this
+
+| Cluster | Traefik `experimentalChannel` | Action |
+|---------|-------------------------------|--------|
+| `rancher-syd-prod` | `true` (see `infrastructure/traefik/values/rancher-syd-prod.yaml`) | Install experimental CRDs **before** or immediately after Traefik first rolls out |
+| `k3s-lhm-prod` / `k3s-lhm-devel` | `false` | Standard Gateway CRDs only (if any); experimental install optional |
+
+Install experimental CRDs as part of cluster bootstrap (after k3s is up, before or alongside the first Fleet Traefik sync). See also [docs/installation.md](docs/installation.md).
+
+### Notes
+
+- **UDP DNS** still uses Traefik **IngressRouteUDP** (`kubernetesCRD`). Traefik does not implement Gateway API **UDPRoute** for this stack.
+- Experimental channel is useful for future **TCPRoute** / **TLSRoute** (e.g. DoT) frontends; HTTP(S) Ingress and IngressRoute continue to work without those resources existing as objects—only the **CRDs** must exist so the watch succeeds.
+
 ## Requirements
 
 - Rancher with Fleet
 - Target clusters labeled according to the scheme above
 - Network access from clusters to configured chart repositories and backup storage
+- For `rancher-syd-prod` Traefik: Gateway API **experimental** CRDs installed (see above)
 
 See [docs/installation.md](docs/installation.md) for k3s bootstrap instructions.

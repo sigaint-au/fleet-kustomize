@@ -68,7 +68,15 @@ After the cluster is up:
 
 4. Ensure the initial Doppler token secret is created in the `external-secrets` namespace before Fleet attempts to deploy `external-secrets-operator`.
 
-5. For `k3s-lhm-prod` and `k3s-lhm-devel` (Harvester guest clusters), enable the Harvester CSI driver so the clusters can consume storage from the underlying Harvester. This requires both the Fleet component and a one-time registration step on the Harvester cluster using the `generate_addon_csi.sh` script. See [Harvester CSI Driver](harvester-csi-driver.md) for the full procedure (including bastion commands).
+5. For **`rancher-syd-prod`** (and any cluster with Traefik `experimentalChannel: true`), install the Kubernetes Gateway API **experimental** CRDs so Traefik can watch TLSRoute/TCPRoute. Without them Traefik logs `could not find … tlsroutes.gateway.networking.k8s.io`. Full commands and verification are in the [README — Gateway API CRDs](../README.md#gateway-api-crds-traefik-experimental-channel). Short form:
+
+   ```bash
+   GATEWAY_API_VERSION=v1.5.1
+   kubectl apply --server-side -f \
+     "https://github.com/kubernetes-sigs/gateway-api/releases/download/${GATEWAY_API_VERSION}/experimental-install.yaml"
+   ```
+
+6. For `k3s-lhm-prod` and `k3s-lhm-devel` (Harvester guest clusters), enable the Harvester CSI driver so the clusters can consume storage from the underlying Harvester. This requires both the Fleet component and a one-time registration step on the Harvester cluster using the `generate_addon_csi.sh` script. See [Harvester CSI Driver](harvester-csi-driver.md) for the full procedure (including bastion commands).
 
 ## Verification
 

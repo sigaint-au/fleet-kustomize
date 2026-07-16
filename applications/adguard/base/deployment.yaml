@@ -65,13 +65,14 @@ spec:
             - name: tls
               mountPath: /opt/adguardhome/certs
               readOnly: true
+          # Large blocklists (OISD Big / HaGeZi / etc.) + DoH need more than defaults.
           resources:
             requests:
-              cpu: 50m
-              memory: 128Mi
-            limits:
-              cpu: "1"
+              cpu: 250m
               memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
           readinessProbe:
             tcpSocket:
               port: 3000
