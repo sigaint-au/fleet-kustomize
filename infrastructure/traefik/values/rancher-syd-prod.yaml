@@ -24,6 +24,14 @@ deployment:
 
 hostNetwork: true
 
+# Chart fails if maxUnavailable is 0 with hostNetwork (default is 0).
+# DaemonSet must allow at least one pod down during rolling updates.
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 0
+
 # Bind privileged ports as non-root (chart default uid 65532).
 securityContext:
   allowPrivilegeEscalation: false
