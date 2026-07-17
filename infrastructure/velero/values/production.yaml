@@ -6,7 +6,7 @@ configuration:
   backupStorageLocation:
     - name: default
       provider: aws
-      bucket: my-k8s-backups
+      bucket: rancher-backup-velero
       config:
         region: us-west-000
         s3Url: https://s3.us-west-000.backblazeb2.com
