@@ -1,12 +1,11 @@
-# HTTP/DoH backend (TCP 3000) for Traefik Ingress.
+# HTTP/DoH backend (TCP 3000) for Traefik Ingress — cluster edge only, not 0.0.0.0/0.
 #
 # rancher-syd-prod Traefik uses hostNetwork. Observed source IPs:
-#   - Same node as backend: node InternalIP / VIP (e.g. 139.99.210.89)
-#   - Cross-node via flannel wireguard: flannel-wg address (10.42.x.0/32),
-#     NOT the node public IP — so node-IP-only allows caused intermittent 502s.
+#   - Same node: node InternalIP / VIP on the host interface
+#   - Cross-node: flannel-wg address 10.42.<podCIDR>.0/32 (NOT the public node IP)
+#   - Occasionally cni0 bridge 10.42.x.1 when hairpinning on-node
 #
-# AdGuard UI/DoH is intentionally public (Ingress + NodePort 31073), so allow
-# any source on 3000. DNS 53/853 already allow 0.0.0.0/0 separately.
+# If nodes are replaced or pod CIDRs change, update the lists below.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -22,10 +21,36 @@ spec:
     - Ingress
   ingress:
     - from:
+        # --- hostNetwork same-node (node public / internal IPs) ---
         - ipBlock:
-            cidr: 0.0.0.0/0
+            cidr: 51.161.136.107/32   # rancher-1894 internal
         - ipBlock:
-            cidr: ::/0
+            cidr: 139.99.149.92/32    # rancher-1894 upstream VIP
+        - ipBlock:
+            cidr: 139.99.210.89/32    # rancher-4e60
+        - ipBlock:
+            cidr: 139.99.210.170/32   # rancher-afe5
+        # --- hostNetwork dual-stack ---
+        - ipBlock:
+            cidr: 2402:1f00:8101:15c::1/128  # rancher-1894
+        - ipBlock:
+            cidr: 2402:1f00:8101:959::1/128  # rancher-4e60
+        - ipBlock:
+            cidr: 2402:1f00:8101:9aa::1/128  # rancher-afe5
+        # --- flannel wireguard (cross-node hostNetwork source) ---
+        - ipBlock:
+            cidr: 10.42.0.0/32   # rancher-afe5 flannel-wg
+        - ipBlock:
+            cidr: 10.42.1.0/32   # rancher-4e60 flannel-wg
+        - ipBlock:
+            cidr: 10.42.3.0/32   # rancher-1894 flannel-wg
+        # --- cni0 bridges (on-node host ↔ pod path) ---
+        - ipBlock:
+            cidr: 10.42.0.1/32
+        - ipBlock:
+            cidr: 10.42.1.1/32
+        - ipBlock:
+            cidr: 10.42.3.1/32
       ports:
         - protocol: TCP
           port: 3000
