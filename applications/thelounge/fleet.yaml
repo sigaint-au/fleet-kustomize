@@ -1,8 +1,7 @@
 # The Lounge — modern web IRC client (rancher-syd-prod only).
 #
-# Chart: oci://oci.trueforge.org/truecharts/thelounge (TrueCharts)
-# Docs:  https://truecharts.org/charts/stable/thelounge/
-#        https://www.datree.io/helm-chart/thelounge-truecharts
+# Chart: https://charts.schoenwald.aero (thelounge)
+# App:   docker.io/thelounge/thelounge (image tag set in values; chart appVersion may lag)
 #
 # Endpoint:
 #   https://irc.sigaint.au/
@@ -10,11 +9,19 @@
 # Requires the supporting bundle at applications/thelounge/config/
 # (NetworkPolicies for Traefik hostNetwork on rancher-syd-prod).
 #
-# Note: TrueCharts currently declares kubeVersion >= 1.33.0.
+# Note: Avoid TrueCharts here — its common library ships a template file with a
+# space in the name (`_topologySpreadConstraints .tpl`), which Fleet rejects
+# during post-render ("illegal name ... in file creation").
 
 defaultNamespace: thelounge
 labels:
   component: thelounge-install
+
+helm:
+  repo: https://charts.schoenwald.aero
+  chart: thelounge
+  version: 0.1.2
+  releaseName: thelounge
 
 targetCustomizations:
   - name: rancher-syd-prod
@@ -22,9 +29,6 @@ targetCustomizations:
       matchLabels:
         sigaint.au/cluster-id: rancher-syd-prod
     helm:
-      chart: oci://oci.trueforge.org/truecharts/thelounge
-      version: 17.7.5
-      releaseName: thelounge
       valuesFiles:
         - values/rancher-syd-prod.yaml
 

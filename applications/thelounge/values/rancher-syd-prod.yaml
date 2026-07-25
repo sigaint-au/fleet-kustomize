@@ -1,54 +1,56 @@
 # Values for The Lounge on irc.sigaint.au (rancher-syd-prod cluster)
 #
-# Chart: oci://oci.trueforge.org/truecharts/thelounge v17.7.5 (app 4.5.2)
-# Common library: TrueCharts common (ingress/service/persistence schema).
+# Chart: schoenwald/thelounge 0.1.2
+# App:   thelounge/thelounge 4.5.2 (latest stable; chart appVersion may lag)
 #
 # TLS terminates at Traefik Ingress; cert-manager issues the cert via
-# ClusterIssuer le-production. Config and user data live on a PVC at /config.
+# ClusterIssuer le-production. Config lives on a PVC at the image default
+# path /var/opt/thelounge.
+
+replicaCount: 1
 
 image:
-  repository: docker.io/thelounge/thelounge
+  registry: docker.io
+  repository: thelounge/thelounge
   pullPolicy: IfNotPresent
+  # Pin newest stable; multi-arch index digest from Docker Hub.
   tag: 4.5.2@sha256:ec3e798d7d9243e49f4f268a4d83c03606fb7e8ace07191e8d1260faceb68d13
 
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
 service:
-  main:
-    ports:
-      main:
-        port: 10061
-        targetPort: 9000
+  type: ClusterIP
+  port: 9000
 
 ingress:
-  main:
-    enabled: true
-    annotations:
-      cert-manager.io/cluster-issuer: le-production
-    hosts:
-      - host: irc.sigaint.au
-        paths:
-          - path: /
-            pathType: Prefix
-    tls:
-      - secretName: irc-sigaint-au-tls
-        hosts:
-          - irc.sigaint.au
+  enabled: true
+  className: ""
+  annotations:
+    cert-manager.io/cluster-issuer: le-production
+  hosts:
+    - host: irc.sigaint.au
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: irc-sigaint-au-tls
+      hosts:
+        - irc.sigaint.au
 
-persistence:
-  config:
-    enabled: true
-    mountPath: /config
-    size: 5Gi
-
-workload:
-  main:
-    podSpec:
-      containers:
-        main:
-          env:
-            THELOUNGE_HOME: /config
+# Chart defaults put fsGroup on container securityContext (invalid); keep
+# pod-level fsGroup and a clean container context.
+podSecurityContext:
+  fsGroup: 1000
 
 securityContext:
-  container:
-    runAsNonRoot: false
-    runAsUser: 0
-    runAsGroup: 0
+  runAsUser: 1000
+  runAsGroup: 1000
+  # Chart default incorrectly nests fsGroup here; drop it (pod-level only).
+  fsGroup: null
+
+serviceAccount:
+  create: true
+  automount: true
