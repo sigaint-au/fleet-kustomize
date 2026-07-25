@@ -40,14 +40,15 @@ ingress:
       hosts:
         - irc.sigaint.au
 
-# Chart defaults put fsGroup on container securityContext (invalid); keep
-# pod-level fsGroup and a clean container context.
+# PVC replaces the image's pre-created node-owned THELOUNGE_HOME. Thelounge
+# chmods that path on start; uid 1000 cannot chmod a root-owned mount → EPERM.
+# Run as root (same as the previous TrueCharts values) so startup succeeds.
 podSecurityContext:
-  fsGroup: 1000
+  fsGroup: null
 
 securityContext:
-  runAsUser: 1000
-  runAsGroup: 1000
+  runAsUser: 0
+  runAsGroup: 0
   # Chart default incorrectly nests fsGroup here; drop it (pod-level only).
   fsGroup: null
 
