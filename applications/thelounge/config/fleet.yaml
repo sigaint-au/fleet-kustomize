@@ -1,0 +1,20 @@
+# Supporting NetworkPolicies for The Lounge (rancher-syd-prod only).
+#
+# The main Helm chart depends on this bundle via component: thelounge-config.
+
+defaultNamespace: thelounge
+labels:
+  component: thelounge-config
+
+targetCustomizations:
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: rancher-syd-prod
+    kustomize:
+      dir: base
+
+  # Config only for rancher-syd-prod.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

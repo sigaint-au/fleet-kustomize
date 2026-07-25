@@ -1,0 +1,39 @@
+# The Lounge — modern web IRC client (rancher-syd-prod only).
+#
+# Chart: oci://oci.trueforge.org/truecharts/thelounge (TrueCharts)
+# Docs:  https://truecharts.org/charts/stable/thelounge/
+#        https://www.datree.io/helm-chart/thelounge-truecharts
+#
+# Endpoint:
+#   https://irc.sigaint.au/
+#
+# Requires the supporting bundle at applications/thelounge/config/
+# (NetworkPolicies for Traefik hostNetwork on rancher-syd-prod).
+#
+# Note: TrueCharts currently declares kubeVersion >= 1.33.0.
+
+defaultNamespace: thelounge
+labels:
+  component: thelounge-install
+
+targetCustomizations:
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: rancher-syd-prod
+    helm:
+      chart: oci://oci.trueforge.org/truecharts/thelounge
+      version: 17.7.5
+      releaseName: thelounge
+      valuesFiles:
+        - values/rancher-syd-prod.yaml
+
+  # IRC only on rancher-syd-prod (public edge with Traefik hostNetwork).
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
+
+dependsOn:
+  - selector:
+      matchLabels:
+        component: thelounge-config

@@ -1,0 +1,5 @@
+# All resources must live under applications/thelounge/ — Fleet packages each
+# fleet.yaml directory as an isolated bundle.
+resources:
+  - networkpolicy-baseline.yaml
+  - networkpolicy-http-from-nodes.yaml
