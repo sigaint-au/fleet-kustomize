@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: netbird-pvc
+  labels:
+    app.kubernetes.io/instance: netbird-server
+    app.kubernetes.io/managed-by: Kustomize
+    app.kubernetes.io/name: netbird-server
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 5Gi

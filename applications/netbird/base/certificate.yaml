@@ -1,0 +1,25 @@
+# TLS for netbird.sigaint.au (HTTP01) + wildcard *.px.sigaint.au (DNS01)
+# Mirrors live cluster 2026-09-02.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: netbird-tls-cert
+spec:
+  secretName: netbird-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-production
+  dnsNames:
+    - netbird.sigaint.au
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: netbird-reverse-proxy-tls
+spec:
+  secretName: netbird-reverse-proxy-tls
+  issuerRef:
+    kind: ClusterIssuer
+    name: le-production
+  dnsNames:
+    - '*.px.sigaint.au'

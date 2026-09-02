@@ -1,0 +1,79 @@
+# Baseline ingress lockdown + allow from Traefik/hostNetwork.
+# Mirrors adguard/forgejo pattern: rancher-syd-prod Traefik is hostNetwork, so need node ipBlocks for TCP 443->pod.
+# Egress unrestricted (STUN, OIDC, Doppler).
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-same-namespace-ingress
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-traefik
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-netbird-from-nodes
+  labels:
+    sigaint.au/network-policy: app
+    app.kubernetes.io/name: netbird
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        # hostNetwork Traefik sources — same-node public/internal + flannel-wg + cni0
+        - ipBlock: { cidr: 51.161.136.107/32 }
+        - ipBlock: { cidr: 139.99.149.92/32 }
+        - ipBlock: { cidr: 139.99.210.89/32 }
+        - ipBlock: { cidr: 139.99.210.170/32 }
+        - ipBlock: { cidr: 2402:1f00:8101:15c::1/128 }
+        - ipBlock: { cidr: 2402:1f00:8101:959::1/128 }
+        - ipBlock: { cidr: 2402:1f00:8101:9aa::1/128 }
+        - ipBlock: { cidr: 10.42.0.0/32 }
+        - ipBlock: { cidr: 10.42.1.0/32 }
+        - ipBlock: { cidr: 10.42.3.0/32 }
+        - ipBlock: { cidr: 10.42.0.1/32 }
+        - ipBlock: { cidr: 10.42.1.1/32 }
+        - ipBlock: { cidr: 10.42.3.1/32 }
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8443

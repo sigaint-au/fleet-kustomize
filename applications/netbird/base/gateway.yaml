@@ -1,0 +1,108 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: netbird-gateway
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: websecure
+      port: 443
+      protocol: HTTPS
+      hostname: netbird.sigaint.au
+      allowedRoutes:
+        namespaces:
+          from: Same
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            group: ""
+            name: netbird-tls
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: netbird-reverse-proxy-gateway
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: tls
+      port: 443
+      protocol: TLS
+      hostname: '*.px.sigaint.au'
+      allowedRoutes:
+        namespaces:
+          from: Same
+      tls:
+        mode: Passthrough
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: netbird
+spec:
+  hostnames:
+    - netbird.sigaint.au
+  parentRefs:
+    - kind: Gateway
+      group: gateway.networking.k8s.io
+      name: netbird-gateway
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+        - path:
+            type: PathPrefix
+            value: /oauth2
+        - path:
+            type: PathPrefix
+            value: /signalexchange.SignalExchange
+        - path:
+            type: PathPrefix
+            value: /management.ManagementService
+      backendRefs:
+        - kind: Service
+          group: ""
+          name: netbird-server
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /relay
+        - path:
+            type: PathPrefix
+            value: /ws-proxy
+      backendRefs:
+        - kind: Service
+          group: ""
+          name: netbird-server
+          port: 81
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - kind: Service
+          group: ""
+          name: netbird-dashboard
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: TLSRoute
+metadata:
+  name: netbird-reverse-proxy
+spec:
+  hostnames:
+    - '*.px.sigaint.au'
+  parentRefs:
+    - kind: Gateway
+      group: gateway.networking.k8s.io
+      name: netbird-reverse-proxy-gateway
+      sectionName: tls
+  rules:
+    - backendRefs:
+        - kind: Service
+          group: ""
+          name: netbird-reverse-proxy
+          port: 443

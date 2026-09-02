@@ -1,0 +1,35 @@
+# NetBird — rancher-syd-prod only.
+#
+# Replicates live netbird namespace (read-only inspection 2026-09-02).
+# 3 Deployments: dashboard, server, reverse-proxy
+# Gateways + HTTPRoute/TLSRoute + 2 Certificates
+# Secrets expected via ExternalSecrets (doppler-auth-api) — fill Doppler keys before sync.
+#
+# Endpoint: https://netbird.sigaint.au/
+# PX wildcard TLS: *.px.sigaint.au (passthrough to reverse-proxy)
+#
+# Verify after Fleet sync:
+#   kubectl -n netbird get deploy,svc,gateway,httproute,tlsroute,cert
+#   dig netbird.sigaint.au +short
+#   curl -k https://netbird.sigaint.au/api | head
+
+defaultNamespace: netbird
+labels:
+  component: netbird
+
+targetCustomizations:
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: rancher-syd-prod
+    kustomize:
+      dir: base
+    dependsOn:
+      - selector:
+          matchLabels:
+            component: traefik-install
+
+  # Sydney only; exclude LHM/harvester/unknowns.
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

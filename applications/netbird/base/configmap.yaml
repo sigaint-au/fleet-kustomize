@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netbird-server-config
+data:
+  # ponytail: template avoids committing secrets; initContainer renders /etc/netbird/config.yaml from Secret netbird (ESO -> Doppler)
+  config.yaml.tmpl: |
+    server:
+      listenAddress: ":80"
+      exposedAddress: "https://netbird.sigaint.au:443"
+      stunPorts:
+        - 3478
+      metricsPort: 9090
+      healthcheckAddress: ":9000"
+      logLevel: "debug"
+      logFile: "console"
+
+      authSecret: "__NETBIRD_DATASTORE_ENCRYPTION_KEY__"
+      dataDir: "/var/lib/netbird"
+
+      stuns:
+        - uri: "stun:stun.cloudflare.com:3478"
+          proto: "udp"
+
+      auth:
+        issuer: "https://netbird.sigaint.au/oauth2"
+        signKeyRefreshEnabled: true
+        dashboardRedirectURIs:
+          - "https://netbird.sigaint.au/nb-auth"
+          - "https://netbird.sigaint.au/nb-silent-auth"
+        cliRedirectURIs:
+          - "http://localhost:53000/"
+
+      store:
+        engine: "sqlite"
+        encryptionKey: "__NETBIRD_DATASTORE_ENCRYPTION_KEY__"
+
+    #  relays:
+    #    addresses:
+    #      - "rels://netbird.sigaint.au:443"
+    #    credentialsTTL: "24h"
+    #    secret: "__NETBIRD_RELAY_PASSWORD__"
