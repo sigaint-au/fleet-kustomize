@@ -3,7 +3,10 @@ kind: Kustomization
 
 namespace: netbird
 
-# ponytail: no commonLabels — 3 sub-apps need distinct app.kubernetes.io/name (dashboard/server/reverse-proxy); global label would overwrite selectors.
+commonLabels:
+  app.kubernetes.io/managed-by: Kustomize
+
+# ponytail: no app.kubernetes.io/name in commonLabels — 3 sub-apps need distinct values (dashboard/server/reverse-proxy); global label would overwrite selectors.
 
 resources:
   - namespace.yaml
