@@ -75,7 +75,7 @@ spec:
               mountPath: /etc/netbird
       containers:
         - name: netbird-server
-          image: netbirdio/netbird-server:0.75.0
+          image: netbirdio/netbird-server:0.77.1
           imagePullPolicy: IfNotPresent
           args:
             - --config
@@ -140,7 +140,7 @@ spec:
     spec:
       containers:
         - name: reverse-proxy
-          image: netbirdio/reverse-proxy:0.75.0
+          image: netbirdio/reverse-proxy:0.77.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: 8443tcp
