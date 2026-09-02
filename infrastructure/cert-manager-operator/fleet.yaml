@@ -5,7 +5,7 @@ labels:
 helm:
   repo: https://charts.jetstack.io
   chart: cert-manager
-  version: v1.20.0
+  version: v1.21.1
   releaseName: cert-manager
   valuesFiles:
     - values/production.yaml

@@ -6,7 +6,7 @@ labels:
 helm:
   repo: https://charts.harvesterhci.io/
   chart: harvester-csi-driver
-  version: 0.1.28
+  version: 0.1.31
   releaseName: harvester-csi-driver
 
 targetCustomizations:

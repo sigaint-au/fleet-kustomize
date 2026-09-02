@@ -5,7 +5,7 @@ labels:
   component: vmcluster-install
 helm:
   repo: https://victoriametrics.github.io/helm-charts/
-  version: 0.42.0
+  version: 0.49.0
   chart: victoria-metrics-cluster
   releaseName: vmcluster
 

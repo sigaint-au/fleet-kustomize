@@ -14,7 +14,7 @@ targetCustomizations:
         sigaint.au/cluster-id: rancher-syd-prod
     helm:
       chart: oci://code.forgejo.org/forgejo-helm/forgejo
-      version: 17.1.0
+      version: 17.1.5
       releaseName: forgejo
       valuesFiles:
         - values/rancher-syd-prod.yaml

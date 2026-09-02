@@ -6,7 +6,7 @@ labels:
 helm:
   repo: https://grafana-community.github.io/helm-charts
   chart: grafana
-  version: 12.4.4
+  version: 13.0.1
   releaseName: grafana
 
 targetCustomizations:

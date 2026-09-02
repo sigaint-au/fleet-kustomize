@@ -5,7 +5,7 @@ labels:
 helm:
   repo: https://falcosecurity.github.io/charts
   chart: falcosidekick
-  version: 0.13.1
+  version: 0.14.0
   releaseName: falcosidekick
 
 targetCustomizations:
