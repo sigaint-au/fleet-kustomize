@@ -20,7 +20,7 @@ spec:
       serviceAccountName: netbird
       containers:
         - name: netbird-dashboard
-          image: netbirdio/dashboard:v2.90.7
+          image: netbirdio/dashboard:v2.91.1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
