@@ -4,7 +4,6 @@ metadata:
   name: netbird-pvc
   labels:
     app.kubernetes.io/instance: netbird-server
-    app.kubernetes.io/managed-by: Kustomize
     app.kubernetes.io/name: netbird-server
 spec:
   accessModes:

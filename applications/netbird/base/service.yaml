@@ -4,7 +4,6 @@ metadata:
   name: netbird-dashboard
   labels:
     app.kubernetes.io/instance: netbird
-    app.kubernetes.io/managed-by: Kustomize
     app.kubernetes.io/name: netbird-dashboard
 spec:
   type: ClusterIP
@@ -27,7 +26,6 @@ metadata:
   name: netbird-reverse-proxy
   labels:
     app.kubernetes.io/instance: netbird
-    app.kubernetes.io/managed-by: Kustomize
     app.kubernetes.io/name: netbird-reverse-proxy
 spec:
   type: ClusterIP
@@ -46,7 +44,6 @@ metadata:
   name: netbird-server
   labels:
     app.kubernetes.io/instance: netbird
-    app.kubernetes.io/managed-by: Kustomize
     app.kubernetes.io/name: netbird-server
 spec:
   type: ClusterIP
