@@ -1,0 +1,21 @@
+# Supporting NetworkPolicies for Falco (all downstream clusters).
+defaultNamespace: falco
+labels:
+  component: falco-config
+
+targetCustomizations:
+  - name: downstream-clusters
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+            - k3s-lhm-devel
+            - rancher-syd-prod
+    kustomize:
+      dir: base
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

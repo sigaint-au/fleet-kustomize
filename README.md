@@ -36,6 +36,7 @@ applications/            # Workload applications
 | CloudNativePG              | Helm                | All clusters           | PostgreSQL operator |
 | Harvester CSI Driver       | Helm                | `k3s-lhm-*`            | Enables Harvester-backed storage in guest clusters (requires one-time Harvester-side setup — see [docs/harvester-csi-driver.md](docs/harvester-csi-driver.md)) |
 | Falcosidekick              | Helm                | `k3s-lhm-*`            | Event forwarder for Falco + Web UI; per-env hostnames + Ingress; Doppler-managed config/secrets |
+| Falco                      | Helm + Kustomize    | All clusters           | Runtime sensor (modern eBPF); ships JSON events to pica API via Bearer token (plaintext values, TODO Doppler) |
 | VictoriaMetrics Cluster    | Helm                | By environment         | Metrics storage & querying |
 | Grafana                    | Helm                | By environment         | Observability dashboards with OIDC (Zitadel) and VictoriaMetrics/VictoriaLogs datasources |
 

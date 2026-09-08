@@ -1,0 +1,35 @@
+# Falco runtime sensor (all downstream clusters). Events ship to the pica API.
+defaultNamespace: falco
+labels:
+  component: falco-install
+helm:
+  repo: https://falcosecurity.github.io/charts
+  chart: falco
+  version: 9.1.0
+  releaseName: falco
+  valuesFiles:
+    - values/common.yaml
+
+targetCustomizations:
+  # Common operator (root helm + values) for the downstream clusters.
+  # Use a single matchExpressions IN list when there is no per-cluster specific config.
+  # Catch-all doNotDeploy excludes local mgmt cluster and everything else.
+  - name: downstream-clusters
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - k3s-lhm-prod
+            - k3s-lhm-devel
+            - rancher-syd-prod
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
+
+# Policies first: the config bundle holds the falco-namespace NetworkPolicies.
+dependsOn:
+  - selector:
+      matchLabels:
+        component: falco-config

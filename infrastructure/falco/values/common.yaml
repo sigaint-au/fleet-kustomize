@@ -1,0 +1,40 @@
+# Falco values, uniform across all clusters.
+#
+# Chart: https://falcosecurity.github.io/charts (falco) 9.1.0, app 0.44.1.
+#
+# Events ship straight to the pica API. Falco 0.44 http_output has NO
+# custom-header support, so it cannot send the Bearer token natively —
+# delivery uses program_output + curl instead (one curl per alert;
+# acceptable: Falco alerts are exceptional, not per-syscall).
+# Payload is JSON (json_output: true below).
+#
+# TODO: move the pica token to Doppler via ExternalSecret and rotate it —
+# it is committed here in plaintext as an interim measure.
+
+driver:
+  # modern eBPF probe — no kernel headers needed on the k3s nodes.
+  # Fall back to kmod only if the probe fails to load on a node.
+  kind: modern_ebpf
+
+falco:
+  # JSON payload for the pica /api/v1/events endpoint.
+  json_output: true
+  stdout_output:
+    enabled: true
+  syslog_output:
+    enabled: false
+  http_output:
+    enabled: false
+  program_output:
+    enabled: true
+    keep_alive: false
+    program: >-
+      curl -s -o /dev/null --max-time 10 -X POST
+      -H 'Content-Type: application/json'
+      -H 'Authorization: Bearer 0X8mmARpPLXeb3NYIDqqd2852TWOyhEMl0lzpicXP6Y'
+      -d @- https://pica.sigaint.au/api/v1/events
+
+# Embedded forwarder off — events go straight to pica, and the standalone
+# falcosidekick release (applications/falcosidekick) is left untouched.
+falcosidekick:
+  enabled: false

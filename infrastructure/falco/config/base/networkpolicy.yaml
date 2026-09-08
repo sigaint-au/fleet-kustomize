@@ -1,0 +1,51 @@
+# Baseline ingress posture for the falco namespace (Falco sensor DaemonSet).
+# Falco ships events out to the pica API; nothing needs inbound access except
+# same-namespace traffic and Traefik-fronted health/metrics scrapes.
+#
+# Policy names are falco-prefixed on purpose: applications/falcosidekick/config
+# already manages same-semantics policies (default-deny-ingress,
+# allow-same-namespace-ingress, allow-from-traefik) in this namespace on
+# k3s-lhm-*. Distinct names keep two Fleet bundles from fighting over the same
+# objects, and keep rancher-syd-prod (no falcosidekick-config) self-sufficient.
+# Overlapping NetworkPolicies are additive, so the duplication is harmless.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: falco-default-deny-ingress
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: falco-allow-same-namespace-ingress
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: falco-allow-from-traefik
+  labels:
+    sigaint.au/network-policy: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik

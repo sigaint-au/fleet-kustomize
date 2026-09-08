@@ -35,6 +35,7 @@ Every `fleet.yaml` follows these conventions:
 - **external-secrets**: all clusters, Doppler ClusterSecretStore. Config bundle per env (production/development).
 - **Velero**: all clusters, Backblaze B2 via S3-compat plugin. Config bundle per env.
 - **CloudNativePG**: all clusters, Helm only. Webhook comparePatches.
+- **Falco**: all clusters, two bundles (Helm install `falco-install` + kustomize config `falco-config` with baseline NetworkPolicies). Uniform values (`values/common.yaml`): modern eBPF driver, `program_output` + curl to pica API with Bearer token (hardcoded interim, TODO Doppler), embedded falcosidekick disabled. Config policies use `falco-` name prefix to avoid colliding with falcosidekick-config policies in the shared `falco` namespace.
 - **Grafana**: k3s-lhm clusters per env, OIDC (Zitadel), VictoriaMetrics datasource. Config bundle with ExternalSecrets.
 - **Falcosidekick**: k3s-lhm clusters per env. Config bundle with NetworkPolicies.
 - **Forgejo**: rancher-syd-prod only, OCI chart. Config bundle overlays per cluster.
