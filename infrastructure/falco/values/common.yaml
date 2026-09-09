@@ -29,4 +29,4 @@ falcosidekick:
   config:
     webhook:
       address: "https://pica.sigaint.au/api/v1/events"
-      customHeaders: "Authorization: Bearer 0X8mmARpPLXeb3NYIDqqd2852TWOyhEMl0lzpicXP6Y"
+      customHeaders: "Authorization: Bearer MPTX1wkZ56Zg64tOK55O0yIMCgkq9MBgV9Iooe_xi70"
