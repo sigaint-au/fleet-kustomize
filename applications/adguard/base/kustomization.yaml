@@ -19,6 +19,7 @@ resources:
   - service.yaml
   - ingress.yaml
   - ingressroute-udp.yaml
+  - ingressroute-tcp.yaml
   - networkpolicy-baseline.yaml
   - networkpolicy-dns.yaml
   - networkpolicy-http-from-nodes.yaml

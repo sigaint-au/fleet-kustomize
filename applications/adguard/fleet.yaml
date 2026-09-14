@@ -5,17 +5,21 @@
 #   - Service NodePort: DNS 30053, DoT 30853 (service ports 53/853)
 #   - Plain DNS UDP: Traefik hostNetwork :53 (IPv4+IPv6) → entrypoint dns
 #                    → IngressRouteUDP → Service adguard:53 → pod
+#   - DNS-over-TLS: Traefik hostNetwork :853 (TCP) → entrypoint dot
+#                    → IngressRouteTCP (TLS passthrough, HostSNI `*` for
+#                       SNI-less clients) → Service adguard:853 → pod
 #   - Dashboard / DoH: Ingress (Traefik HTTP/HTTPS, dual-stack on node IPs)
 #   - PVC for conf/work
 #
 # Endpoints:
 #   DNS plain:      Traefik node :53 (UDP) or any node :30053 (NodePort)
-#   DNS-over-TLS:   any node :30853 (NodePort)
+#   DNS-over-TLS:   Traefik node :853 (TCP) or any node :30853 (NodePort)
 #   Dashboard:      https://adguard.sigaint.au/
 #   DNS-over-HTTPS: https://dns.adguard.sigaint.au/dns-query
 #
-# Host firewall — Traefik nodes (UDP DNS via Traefik):
+# Host firewall — Traefik nodes (DNS + DoT via Traefik):
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/udp
+#   sudo firewall-cmd --permanent --zone=public --add-port=853/tcp
 # Optional NodePort access:
 #   sudo firewall-cmd --permanent --zone=public --add-port=30053/udp
 #   sudo firewall-cmd --permanent --zone=public --add-port=30053/tcp
