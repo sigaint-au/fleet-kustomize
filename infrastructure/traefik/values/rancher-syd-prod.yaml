@@ -75,7 +75,8 @@ ports:
       default: true
     exposedPort: 53
   # DNS-over-TLS (TCP) on host :853 — passthrough to AdGuard :853.
-  # Catch-all HostSNI(`*`) so SNI-less DoT clients also connect.
+  # Catch-all HostSNIRegexp(`.*`) so SNI-less DoT clients also connect
+  # (plain HostSNI(`*`) matches nothing on this Traefik version).
   dot:
     port: 853
     hostPort: 853
