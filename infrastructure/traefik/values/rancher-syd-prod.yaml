@@ -19,6 +19,7 @@
 #   sudo firewall-cmd --permanent --zone=public --add-service=http
 #   sudo firewall-cmd --permanent --zone=public --add-service=https
 #   sudo firewall-cmd --permanent --zone=public --add-port=53/udp
+#   sudo firewall-cmd --permanent --zone=public --add-port=4505-4506/tcp
 #   sudo firewall-cmd --reload
 
 deployment:
@@ -83,6 +84,21 @@ ports:
     expose:
       default: true
     exposedPort: 853
+  # Salt master (TCP) — publish on 4505, request/return on 4506.
+  salt-publish:
+    port: 4505
+    hostPort: 4505
+    protocol: TCP
+    expose:
+      default: true
+    exposedPort: 4505
+  salt-request:
+    port: 4506
+    hostPort: 4506
+    protocol: TCP
+    expose:
+      default: true
+    exposedPort: 4506
 
 # hostNetwork exposes traffic on each node; no LoadBalancer/NodePort Service.
 service:
