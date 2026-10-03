@@ -24,6 +24,9 @@ targetCustomizations:
       chart: oci://registry-1.docker.io/digitalist/matomo
       version: 12.0.21
       releaseName: matomo
+      # Same as MetalLB: let Helm own its objects so Fleet does not flag the
+      # chart's own labels (app.kubernetes.io/managed-by) as drift.
+      takeOwnership: true
       valuesFiles:
         - values/rancher-syd-prod.yaml
 
