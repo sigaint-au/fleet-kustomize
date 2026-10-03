@@ -25,6 +25,14 @@ matomo:
     ingress:
       annotations:
         cert-manager.io/cluster-issuer: le-production
+        # Both Ingresses share this hostname and Traefik prefers the longer
+        # tracker paths, so /index.php (dashboard UI assets like
+        # ?module=Proxy) would land on the tracker backend, whose nginx
+        # 403s it. Pin the dashboard router above any path-length priority
+        # (longest tracker path is ~36 chars) so the dashboard serves the
+        # whole site; the tracker Deployment stays up but receives no
+        # same-host traffic.
+        traefik.ingress.kubernetes.io/router.priority: "100"
     # Placeholder admin password — rotate it in the Matomo UI after first
     # login. (The chart offers no secret-backed knob for firstuser.)
     firstuser:
