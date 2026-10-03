@@ -1,0 +1,6 @@
+# All resources must live under applications/matomo/ — Fleet packages each
+# fleet.yaml directory as an isolated bundle (no ../../../components paths).
+resources:
+  - external-secret.yaml
+  - networkpolicy-baseline.yaml
+  - networkpolicy-http-from-nodes.yaml
