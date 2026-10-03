@@ -29,6 +29,7 @@ targetCustomizations:
       takeOwnership: true
       valuesFiles:
         - values/rancher-syd-prod.yaml
+        - values/nginx-single-host.yaml
 
   # Matomo only on rancher-syd-prod (config above).
   - name: exclude-others
