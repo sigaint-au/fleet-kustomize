@@ -2,5 +2,6 @@
 # fleet.yaml directory as an isolated bundle (no ../../../components paths).
 resources:
   - external-secret.yaml
+  - networkpolicy-baubley-http-from-nodes.yaml
   - networkpolicy-baseline.yaml
   - networkpolicy-http-from-nodes.yaml
