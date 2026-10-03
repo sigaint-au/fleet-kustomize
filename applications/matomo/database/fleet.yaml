@@ -4,7 +4,8 @@
 #
 # Single-replica standalone instance in customer-sites. Creates database
 # `matomo`; the Matomo bundle consumes it via db.* (hostname
-# matomo-db-mariadb, root password Secret matomo-db-mariadb).
+# matomo-db-mariadb, root password from the Doppler-managed
+# matomo-db-credentials Secret).
 # The Matomo Helm bundle depends on this bundle via component: matomo-database.
 defaultNamespace: customer-sites
 labels:

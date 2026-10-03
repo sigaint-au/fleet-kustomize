@@ -3,8 +3,9 @@
 # Chart: oci://registry-1.docker.io/bitnamicharts/mariadb 28.1.1
 #
 # Single-replica standalone instance (architecture: standalone deploys exactly
-# one primary, no secondaries). Release `matomo-db` creates Service and
-# Secret `matomo-db-mariadb`, which the Matomo bundle references in db.*.
+# one primary, no secondaries). Release `matomo-db` creates Service
+# `matomo-db-mariadb`; the Secret is Doppler-managed (matomo-db-credentials
+# ExternalSecret) because auth.existingSecret is set — the chart creates none.
 
 # Explicit single replica — do not switch to `replication` (that adds
 # secondaries and a different topology).
