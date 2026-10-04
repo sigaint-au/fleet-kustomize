@@ -20,7 +20,7 @@ spec:
       serviceAccountName: netbird
       containers:
         - name: netbird-dashboard
-          image: netbirdio/dashboard:v2.92.0
+          image: netbirdio/dashboard:v2.94.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -60,7 +60,7 @@ spec:
       initContainers:
         - name: render-config
           # ponytail: busybox for sed templating; keep if image pull matters, replace with distroless+cp if air-gapped
-          image: docker.io/library/busybox:1.36
+          image: docker.io/library/busybox:1.38
           imagePullPolicy: IfNotPresent
           command:
             - sh
@@ -82,7 +82,7 @@ spec:
               mountPath: /etc/netbird
       containers:
         - name: netbird-server
-          image: netbirdio/netbird-server:0.78.1
+          image: netbirdio/netbird-server:0.80.0
           imagePullPolicy: IfNotPresent
           args:
             - --config
@@ -154,7 +154,7 @@ spec:
     spec:
       containers:
         - name: reverse-proxy
-          image: netbirdio/reverse-proxy:0.78.1
+          image: netbirdio/reverse-proxy:0.80.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: 8443tcp
