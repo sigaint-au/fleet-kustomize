@@ -1,6 +1,6 @@
 # Falco values, uniform across all clusters.
 #
-# Chart: https://falcosecurity.github.io/charts (falco) 9.1.0, app 0.44.1.
+# Chart: https://falcosecurity.github.io/charts (falco) 9.2.0, app 0.45.0.
 #
 # Events flow: Falco DaemonSet -> embedded falcosidekick Service (auto-wired
 # by the parent chart: json_output + http_output) -> pica API via the
