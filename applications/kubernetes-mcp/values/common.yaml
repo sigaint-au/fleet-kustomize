@@ -1,0 +1,16 @@
+# Keep the endpoint cluster-internal and limit its Kubernetes access to read-only.
+image:
+  version: "0.0.67"
+
+ingress:
+  enabled: false
+
+config:
+  read_only: true
+
+rbac:
+  extraClusterRoleBindings:
+    - name: view
+      roleRef:
+        name: view
+        external: true

@@ -1,0 +1,26 @@
+# Kubernetes MCP Server on all downstream clusters.
+defaultNamespace: kubernetes-mcp
+labels:
+  component: kubernetes-mcp-install
+
+helm:
+  chart: oci://ghcr.io/containers/charts/kubernetes-mcp-server
+  version: 0.1.0
+  releaseName: kubernetes-mcp
+  valuesFiles:
+    - values/common.yaml
+
+targetCustomizations:
+  - name: downstream-clusters
+    clusterSelector:
+      matchExpressions:
+        - key: sigaint.au/cluster-id
+          operator: In
+          values:
+            - rke2-lhm-prod
+            - k3s-lhm-devel
+            - rancher-syd-prod
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true
