@@ -1,4 +1,4 @@
-# Kubernetes MCP Server on all downstream clusters.
+# Kubernetes MCP Server on rancher-syd-prod only.
 defaultNamespace: kubernetes-mcp
 labels:
   component: kubernetes-mcp-install
@@ -11,16 +11,16 @@ helm:
     - values/common.yaml
 
 targetCustomizations:
-  - name: downstream-clusters
+  - name: rancher-syd-prod
     clusterSelector:
-      matchExpressions:
-        - key: sigaint.au/cluster-id
-          operator: In
-          values:
-            - rke2-lhm-prod
-            - k3s-lhm-devel
-            - rancher-syd-prod
+      matchLabels:
+        sigaint.au/cluster-id: rancher-syd-prod
 
   - name: exclude-others
     clusterSelector: {}
     doNotDeploy: true
+
+dependsOn:
+  - selector:
+      matchLabels:
+        component: kubernetes-mcp-config

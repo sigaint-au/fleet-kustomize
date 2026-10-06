@@ -1,0 +1,16 @@
+# Supporting Traefik middleware and NetworkPolicy (rancher-syd-prod only).
+defaultNamespace: kubernetes-mcp
+labels:
+  component: kubernetes-mcp-config
+
+targetCustomizations:
+  - name: rancher-syd-prod
+    clusterSelector:
+      matchLabels:
+        sigaint.au/cluster-id: rancher-syd-prod
+    kustomize:
+      dir: base
+
+  - name: exclude-others
+    clusterSelector: {}
+    doNotDeploy: true

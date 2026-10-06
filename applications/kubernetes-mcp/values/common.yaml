@@ -1,9 +1,18 @@
-# Keep the endpoint cluster-internal; grant the server full Kubernetes access.
+# Keep cluster-admin access behind a Traefik IP allowlist.
 image:
   version: "v0.0.67"
 
 ingress:
-  enabled: false
+  enabled: true
+  className: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: le-production
+    traefik.ingress.kubernetes.io/router.middlewares: kubernetes-mcp-mcp-allowlist@kubernetescrd
+  host: kubernetes-mcp.apps.rancher.syd.prod.sigaint.au
+  path: /
+  pathType: Prefix
+  tls:
+    secretName: kubernetes-mcp-tls
 
 config:
   read_only: false
