@@ -1,4 +1,4 @@
-# Keep the endpoint cluster-internal and limit its Kubernetes access to read-only.
+# Keep the endpoint cluster-internal; grant the server full Kubernetes access.
 image:
   version: "v0.0.67"
 
@@ -6,11 +6,11 @@ ingress:
   enabled: false
 
 config:
-  read_only: true
+  read_only: false
 
 rbac:
   extraClusterRoleBindings:
-    - name: view
+    - name: cluster-admin
       roleRef:
-        name: view
+        name: cluster-admin
         external: true
