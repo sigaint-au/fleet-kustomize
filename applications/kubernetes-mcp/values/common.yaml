@@ -1,6 +1,6 @@
 # Keep the endpoint cluster-internal and limit its Kubernetes access to read-only.
 image:
-  version: "0.0.67"
+  version: "v0.0.67"
 
 ingress:
   enabled: false
